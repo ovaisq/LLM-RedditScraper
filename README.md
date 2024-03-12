@@ -110,7 +110,7 @@ graph LR
   - and all comments for each author.
 *  Subscribes to subreddit that a submission was posted to
 
-** Deployed as WSGI **  
+**Deployed as WSGI**  
 *  Uses Gunicorn WSGI
 
 #### How-to Run this
@@ -223,7 +223,7 @@ Environment="OLLAMA_HOST=0.0.0.0"
     ENCRYPTION_KEY=
   ```
 
-* Run Zollama-GPT Service:
+* Run Rollama-GPT Service:
     (see https://docs.gunicorn.org/en/stable/settings.html for config details)
 ```shell
     > gunicorn --certfile=cert.pem \

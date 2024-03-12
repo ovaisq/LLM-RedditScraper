@@ -1,0 +1,13 @@
+cryptography==41.0.7
+Flask==3.0.2
+Flask_JWT_Extended==4.6.0
+httpx
+langdetect==1.0.9
+ollama==0.1.7
+praw==7.7.1
+prawcore==2.4.0
+psycopg2_binary==2.9.7
+python_daemon==3.0.1
+Requests==2.31.0
+schedule==1.2.1
+urllib3==1.26.14
