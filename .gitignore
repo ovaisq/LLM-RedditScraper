@@ -1,0 +1,5 @@
+setup.config
+sonar_it.sh
+*.pem
+*.key
+__pycache__

@@ -1,0 +1,26 @@
+# update with required information and save it as
+#	setup.config file
+[psqldb]
+host=
+port=5432
+database=
+user=
+password=
+
+[reddit]
+client_id=
+client_secret=
+username=
+password=
+user_agent=
+
+[service]
+JWT_SECRET_KEY=
+SRVC_SHARED_SECRET=
+IDENTITY=
+APP_SECRET_KEY=
+CSRF_PROTECTION_KEY=
+ENDPOINT_URL=
+OLLAMA_API_URL=
+LLMS=
+ENCRYPTION_KEY=
