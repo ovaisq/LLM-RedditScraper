@@ -1,4 +1,4 @@
-## ZOLLAMA-GPT
+## ROLLAMA-GPT
 
 ### General Overview
 
@@ -85,9 +85,7 @@ graph LR
     sub["/get_authors_comments"] --> sub7
     sub["/get_and_analyze_post"] --> sub12
     sub["/get_and_analyze_comment"] --> sub14
-    sub["/analyze_visit_notes"] --> sub15
     sub["/join_new_subs"] --> sub11
-    sub["/analyze_visit_note"] --> sub13
     sub["CLIENT"] --> sub11
     sub1["GET: Analyze a single Reddit post"]
     sub2["GET: Analyze all Reddit posts in the database"]
@@ -100,25 +98,8 @@ graph LR
     sub10["GET: Chat prompt all comments that are stored in DB"]
     sub11["GET: Join all new subs from the post table in the database"]
     sub12["GET: Fetch post from Reddit, then Chat prompt a given post_id"]
-    sub13["GET: Analyze Visit OSCE format Visit Note"]
     sub14["GET: Fetch comment from Reddit, then Chat prompt a given comment_id"]
-    sub15["GET: Analyze all OSCE format Visit Notes that exist in database"]
 ```
-
-
-**From ADT Feeds and/or EMR**: 
- * Captures medical conversations in Objective Structured Clinical Examinations (OSCE) format.
- * Condenses the medical conversation into a concise prompt.
- * Utilizes medllama LLMs to analyze the condensed conversation.
-   - Converts the summarized note into a diagnosis and treatment plan.
-   - Derives a prescription note based on the diagnosis and treatment plan.
-   - Extracts ICD-10 codes from the diagnosis.
-   - Adds details of ICD-10 codes by performing a lookup.
-   - Extracts CPT codes from both diagnosis and prescription notes.
-   - Retrieves details of CPT codes, such as description and billability.
-   - Identifies keywords from the diagnosis and treatment plan.
-   - Stores all information as various JSON documents in PostgreSQL.
- * Encrypts the analyzed text and incorporates it into a searchable JSON document in PostgreSQL.
   
 **From Reddit**:
 * Service collects
@@ -239,7 +220,6 @@ Environment="OLLAMA_HOST=0.0.0.0"
     ENDPOINT_URL=
     OLLAMA_API_URL=
     LLMS=
-    MEDLLMS=
     ENCRYPTION_KEY=
   ```
 
@@ -249,7 +229,7 @@ Environment="OLLAMA_HOST=0.0.0.0"
     > gunicorn --certfile=cert.pem \
                --keyfile=key.pem \
                --bind 0.0.0.0:5000 \
-               zollama:app \
+               rollama:app \
                --timeout 2592000 \
                --threads 4 \
                --reload
