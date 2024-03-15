@@ -69,6 +69,40 @@ flowchart TD
     class blank5 subgraph_padding
     class blank6 subgraph_padding
 ```
+#### Environment Configuration
+```mermaid
+%%{init: {'theme': 'forest'}}%%
+graph TD;
+    style R fill:#a7e0f2,stroke:#13821a,stroke-width:4px
+  subgraph ROllama[ ]
+  R(("`**ROllama
+    &nbsp&nbsp&nbsp&nbspService&nbspAPI**`"&nbsp&nbsp&nbsp
+    Debian 12 VM
+    &nbsp&nbsp&nbsp4 vCPU, 2GB RAM&nbsp&nbsp&nbsp ))
+  end
+  subgraph Load_Balancer["Load Balancer"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp]
+    Nginx[Nginx]
+  end
+
+  subgraph Nodes["Nodes"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp]
+    Node1[MacOS Sonoma 14.4
+    MacBook Pro M1 Max
+    32GB RAM]
+    Node2[Debian 12
+    16 Cores
+    48GB RAM
+    nVidia GTX 1070ti 8GB VRAM]
+    Node3[Debian 12 VM
+    16 vCPU
+    32GB RAM
+    nVidia RTX 3060 12GB VRAM]
+  end
+
+  Nginx -- RR --> Node1
+  Nginx -- RR --> Node2
+  Nginx -- RR --> Node3
+  R --> Nginx
+```
 
 #### API Overview
 ```mermaid
