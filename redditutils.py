@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
+"""Reddit client interaction utils
+"""
 
 # Import required local modules
 from config import get_config
 from database import get_select_query_results
+from reddit_api import create_reddit_instance
 
 # constants
 CONFIG = get_config()
@@ -25,4 +28,4 @@ def reply_post(post_id):
 
     if analyzed_data:
         a_post = REDDIT.submission('1b0yadp')
-        a_post.reply()
+        a_post.reply("WIP")

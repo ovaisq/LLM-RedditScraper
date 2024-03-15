@@ -1,5 +1,7 @@
 # utils.py
 # ©2024, Ovais Quraishi
+"""Utility functions
+"""
 
 import datetime
 import logging
@@ -69,16 +71,16 @@ def sleep_to_avoid_429(counter):
 
     counter += 1
     if counter > 23: # anecdotal magic number
-        sleep_for = random.randrange(65, 345)
-        logging.info(f"Sleeping for {sleep_for} seconds")
+        sleep_for = random.randrange(75, 445)
+        logging.info("Sleeping for %s seconds", sleep_for)
         time.sleep(sleep_for)
         counter = 0
     return counter
 
-def serialize_datetime(obj): 
-    """Credit: https://www.geeksforgeeks.org/how-to-fix-datetime-datetime-not-json-serializable-in-python/
+def serialize_datetime(obj):
+    """Data n Time object serialized for JSON
     """
 
-    if isinstance(obj, (datetime.datetime, datetime.datetime)): 
-        return obj.isoformat() 
+    if isinstance(obj, (datetime.datetime, datetime.datetime)):
+        return obj.isoformat()
     raise TypeError("Type not serializable")

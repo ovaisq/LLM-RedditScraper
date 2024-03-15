@@ -3,8 +3,8 @@
 """DB Utils
 """
 
-import psycopg2
 import logging
+import psycopg2
 from config import get_config
 
 def psql_connection():
@@ -129,7 +129,7 @@ def db_get_post_ids():
     post_ids = get_select_query_results(sql_query)
     if not post_ids:
         logging.warning("db_get_post_ids(): no post_ids found in DB")
-        return
+        return False
 
     for a_post_id in post_ids:
         post_id_list.append(a_post_id[0])
@@ -151,7 +151,7 @@ def db_get_comment_ids():
     comment_ids = get_select_query_results(sql_query)
     if not comment_ids:
         logging.warning("db_get_comment_ids(): no post_ids found in DB")
-        return
+        return False
 
     for a_comment_id in comment_ids:
         comment_id_list.append(a_comment_id[0])

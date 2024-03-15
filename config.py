@@ -19,4 +19,3 @@ def read_config(file_path):
 def get_config():
     """Returns the parsed configuration object"""
     return read_config(CONFIG_FILE)
-

@@ -1,8 +1,11 @@
 # reddit_api.py
 # ©2024, Ovais Quraishi
+"""Reddit object
+"""
 
+import logging
 import praw
-from prawcore import exceptions
+from praw import exceptions
 from config import get_config
 
 def create_reddit_instance():
@@ -19,6 +22,5 @@ def create_reddit_instance():
                             )
         return reddit
     except exceptions.APIException as e:
-        logging.error(f"Unable to reach Reddit API: {e}")
+        logging.error("Unable to reach Reddit API: %s", e)
         raise
-
