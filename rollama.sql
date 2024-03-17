@@ -2,13 +2,13 @@
 CREATE DATABASE rollama;
 
 --Create Tables
-CREATE TABLE IF NOT EXISTS author (
+CREATE TABLE IF NOT EXISTS authors (
     author_id VARCHAR PRIMARY KEY,
     author_name VARCHAR,
     author_created_utc INT
 );
 
-CREATE TABLE IF NOT EXISTS post (
+CREATE TABLE IF NOT EXISTS posts (
     post_id VARCHAR PRIMARY KEY,
     subreddit VARCHAR,
     post_author VARCHAR,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS post (
     subreddit_members INTEGER
 );
 
-CREATE TABLE IF NOT EXISTS comment (
+CREATE TABLE IF NOT EXISTS comments (
     comment_id VARCHAR PRIMARY KEY,
     comment_author VARCHAR,
     is_comment_submitter BOOLEAN,
@@ -59,14 +59,14 @@ CREATE INDEX IF NOT EXISTS analysis_document_gin_index ON analysis_documents USI
     analysis_document jsonb_path_ops
 );
 --Author
-CREATE UNIQUE INDEX IF NOT EXISTS author_pkey ON public.author USING btree (
-    author_id
+CREATE UNIQUE INDEX IF NOT EXISTS authors_pkey ON public.authors USING btree (
+    authors_id
 );
 --Comment
-CREATE UNIQUE INDEX IF NOT EXISTS comment_pkey ON public.comment USING btree (
+CREATE UNIQUE INDEX IF NOT EXISTS comment_pkey ON public.comments USING btree (
     comment_id
 );
-CREATE INDEX IF NOT EXISTS comment_post_id_idx ON public.comment USING btree (
+CREATE INDEX IF NOT EXISTS comment_post_id_idx ON public.comments USING btree (
     post_id, subreddit
 );
 --Errors
@@ -74,13 +74,13 @@ CREATE INDEX IF NOT EXISTS errors_item_id_idx ON public.errors USING btree (
     item_id
 );
 --Posts
-CREATE UNIQUE INDEX IF NOT EXISTS post_pkey ON public.post USING btree (
+CREATE UNIQUE INDEX IF NOT EXISTS post_pkey ON public.posts USING btree (
     post_id
 );
-CREATE INDEX IF NOT EXISTS post_post_author_idx ON public.post USING btree (
+CREATE INDEX IF NOT EXISTS post_post_author_idx ON public.posts USING btree (
     post_author
 );
-CREATE INDEX IF NOT EXISTS post_subreddit_idx ON public.post USING btree (
+CREATE INDEX IF NOT EXISTS post_subreddit_idx ON public.posts USING btree (
     subreddit
 );
 --Subscription

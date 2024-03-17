@@ -147,7 +147,7 @@ def analyze_post(post_id):
     #       added to the database. Currently, posts are stored in their
     #       original form as they were when they were collected.
     sql_query = f"""SELECT post_title, post_body, post_id
-                    FROM post
+                    FROM posts
                     WHERE post_id='{post_id}'
                     AND post_body NOT IN ('', '[removed]', '[deleted]');"""
     post_data =  get_select_query_results(sql_query)
@@ -228,7 +228,7 @@ def analyze_comment(comment_id):
     logging.info('Analyzing comment ID %s', comment_id)
 
     sql_query = f"""SELECT comment_id, comment_body
-                    FROM comment
+                    FROM comments
                     WHERE comment_id='{comment_id}'
                     AND comment_body NOT IN ('', '[removed]', '[deleted]');"""
     comment_data =  get_select_query_results(sql_query)
@@ -299,7 +299,7 @@ def get_sub_post(post_id):
 
     post = REDDIT.submission(post_id)
     post_data = get_post_details(post)
-    insert_data_into_table('post', post_data)
+    insert_data_into_table('posts', post_data)
     get_post_comments(post)
 
 def get_sub_posts(sub):
@@ -309,7 +309,7 @@ def get_sub_posts(sub):
     logging.info('Getting posts in subreddit %s', sub)
     try:
         posts = REDDIT.subreddit(sub).hot(limit=None)
-        new_post_ids = get_new_data_ids('post', 'post_id', posts)
+        new_post_ids = get_new_data_ids('posts', 'post_id', posts)
         counter = 0
         for post_id in new_post_ids:
             get_sub_post(post_id)
@@ -332,7 +332,7 @@ def get_post_comments(post_obj):
 
     for comment in post_obj.comments:
         comment_data = get_comment_details(comment)
-        insert_data_into_table('comment', comment_data)
+        insert_data_into_table('comments', comment_data)
 
 def get_post_details(post):
     """Get details for a submission post
@@ -415,7 +415,7 @@ def process_author(author_name):
                            'author_name': author.name,
                            'author_created_utc': int(author.created_utc),
                           }
-            insert_data_into_table('author', author_data)
+            insert_data_into_table('authors', author_data)
     except (AttributeError, TypeError, exceptions.NotFound) as e:
         # store this for later inspection
         error_data = {
@@ -441,14 +441,14 @@ def process_comment(comment):
 
     if comment_body not in ('[removed]', '[deleted]') and comment.author.name != 'AutoModerator':
         comment_data = get_comment_details(comment)
-        insert_data_into_table('comment', comment_data)
+        insert_data_into_table('comments', comment_data)
         orig_post = REDDIT.submission(comment_data['post_id'])
         post_data = get_post_details(orig_post)
-        insert_data_into_table('post', post_data)
+        insert_data_into_table('posts', post_data)
 
     if comment_body in ('[removed]', '[deleted]'): #removed or deleted comments
         comment_data = get_comment_details(comment)
-        insert_data_into_table('comment', comment_data)
+        insert_data_into_table('comments', comment_data)
 
 def get_authors_comments():
     """Get comments and posts for authors listed in the author table, 
@@ -486,7 +486,7 @@ def get_author_comments(author):
     try:
         redditor = REDDIT.redditor(author)
         comments = redditor.comments.hot(limit=None)
-        author_comments = get_new_data_ids('comment', 'comment_id', comments)
+        author_comments = get_new_data_ids('comments', 'comment_id', comments)
         if not author_comments:
             logging.info('%s has no new comments', author)
             return
@@ -539,8 +539,20 @@ def join_new_subs():
     dt = unix_ts_str()
 
     # get new subs
-    sql_query = """select subreddit from post where subreddit not in \
-                (select subreddit from subscription) group by subreddit;"""
+    sql_query = """
+                    select
+                        subreddit
+                    from
+                        posts
+                    where
+                        subreddit not in (
+                        select
+                            subreddit
+                        from
+                            subscription)
+                    group by
+                        subreddit;
+                """
     new_sub_rows = get_select_query_results(sql_query)
     if not new_sub_rows:
         logging.info('No new subreddits to join')
@@ -610,7 +622,7 @@ def get_comment(comment_id):
 
     comment = REDDIT.comment(comment_id)
     comment_data = get_comment_details(comment)
-    insert_data_into_table('comment', comment_data)
+    insert_data_into_table('comments', comment_data)
 
 def get_and_analyze_comment(comment_id):
     """If post does not exist, fetch it, then analyze it

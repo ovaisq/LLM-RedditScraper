@@ -108,7 +108,7 @@ def db_get_authors():
     """
 
     author_list = []
-    query = """SELECT author_name FROM author GROUP BY author_name;"""
+    query = """SELECT author_name FROM authors GROUP BY author_name;"""
     authors = get_select_query_results(query)
     for row in authors:
         author_list.append(row[0])
@@ -120,7 +120,7 @@ def db_get_post_ids():
 
     post_id_list = []
     sql_query = """SELECT post_id
-                   FROM post
+                   FROM posts
                    WHERE post_body NOT IN ('', '[removed]', '[deleted]')
                    AND post_id NOT IN (SELECT analysis_document ->> 'post_id' AS pid
                                        FROM analysis_documents
@@ -142,7 +142,7 @@ def db_get_comment_ids():
 
     comment_id_list = []
     sql_query = """SELECT comment_id
-                   FROM comment
+                   FROM comments
                    WHERE comment_body NOT IN ('', '[removed]', '[deleted]')
                    AND comment_id NOT IN (SELECT analysis_document ->> 'comment_id' AS pid
                                           FROM analysis_documents
