@@ -84,3 +84,16 @@ def serialize_datetime(obj):
     if isinstance(obj, (datetime.datetime, datetime.datetime)):
         return obj.isoformat()
     raise TypeError("Type not serializable")
+
+def check_endpoint_health(url):
+    """Check if endpoint is available
+    """
+
+    try:
+        response = requests.head(url)
+        if response.status_code == requests.codes.ok:
+            return True
+        else:
+            return False
+    except requests.exceptions.RequestException:
+        return False
