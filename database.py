@@ -125,7 +125,11 @@ def db_get_post_ids():
                    AND post_id NOT IN (SELECT analysis_document ->> 'post_id' AS pid
                                        FROM analysis_documents
                                        WHERE analysis_document ->> 'post_id' IS NOT NULL
-                                       GROUP BY pid);"""
+                                       GROUP BY pid)
+                   AND post_id NOT IN (SELECT analysis_document ->> 'reference_id' AS RID
+                   					   from analysis_documents
+                   					   WHERE analysis_document ->> 'reference_id' IS NOT NULL
+                   					   group by RID);"""
     post_ids = get_select_query_results(sql_query)
     if not post_ids:
         logging.warning("db_get_post_ids(): no post_ids found in DB")
@@ -147,7 +151,11 @@ def db_get_comment_ids():
                    AND comment_id NOT IN (SELECT analysis_document ->> 'comment_id' AS pid
                                           FROM analysis_documents
                                           WHERE analysis_document ->> 'comment_id' is NOT null
-                                          GROUP BY pid);"""
+                                          GROUP BY pid)
+                   AND comment_id NOT IN (SELECT analysis_document ->> 'reference_id' AS RID
+                                       from analysis_documents
+                                       WHERE analysis_document ->> 'reference_id' IS NOT NULL
+                                       group by RID);"""
     comment_ids = get_select_query_results(sql_query)
     if not comment_ids:
         logging.warning("db_get_comment_ids(): no post_ids found in DB")
