@@ -550,6 +550,7 @@ def join_new_subs():
                             subreddit
                         from
                             subscription)
+                    and subreddit not like 'u_%'
                     group by
                         subreddit;
                 """
