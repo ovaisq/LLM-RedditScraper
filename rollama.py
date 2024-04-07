@@ -583,7 +583,7 @@ def join_new_subs():
 
     if new_sub_rows:
         for new_sub in subs:
-            new_sub = new_sub[0]
+            new_sub = new_sub
             logging.info('Joining new sub %s', new_sub)
             try:
                 REDDIT.subreddit(new_sub).subscribe()
