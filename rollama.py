@@ -70,7 +70,7 @@ from database import db_get_post_ids
 from database import db_get_comment_ids
 from gptutils import prompt_chat
 from reddit_api import create_reddit_instance
-from utils import unix_ts_str, sleep_to_avoid_429
+from utils import unix_ts_str, sleep_to_avoid_429, get_vals_list_of_dicts
 
 app = Flask('ROllama-GPT')
 
@@ -559,8 +559,10 @@ def join_new_subs():
         logging.info('No new subreddits to join')
         return
 
+    subs = get_vals_list_of_dicts('subreddit', new_sub_rows)
+
     if new_sub_rows:
-        for new_sub in new_sub_rows:
+        for new_sub in subs:
             new_sub = new_sub[0]
             logging.info('Joining new sub %s', new_sub)
             try:

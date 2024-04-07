@@ -97,3 +97,11 @@ def check_endpoint_health(url):
             return False
     except requests.exceptions.RequestException:
         return False
+
+def get_vals_list_of_dicts(dict_key, list_of_dicts):
+    """Get values of a given key from a list of dictionaries
+    """
+
+    vals = [x[dict_key] for x in list_of_dicts]
+
+    return vals
