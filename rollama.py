@@ -554,7 +554,7 @@ def join_new_subs():
                     group by
                         subreddit;
                 """
-    new_sub_rows = get_select_query_results(sql_query)
+    new_sub_rows = get_select_query_result_dicts(sql_query)
     if not new_sub_rows:
         logging.info('No new subreddits to join')
         return
