@@ -66,6 +66,7 @@ from database import db_get_authors
 from database import insert_data_into_table
 from database import get_new_data_ids
 from database import get_select_query_results
+from database import get_select_query_result_dicts
 from database import db_get_post_ids
 from database import db_get_comment_ids
 from gptutils import prompt_chat
@@ -146,11 +147,19 @@ def analyze_post(post_id):
     #TODO(fixme): handle updates to posts that may have occurred after they were
     #       added to the database. Currently, posts are stored in their
     #       original form as they were when they were collected.
-    sql_query = f"""SELECT post_title, post_body, post_id
-                    FROM posts
-                    WHERE post_id='{post_id}'
-                    AND post_body NOT IN ('', '[removed]', '[deleted]');"""
+    sql_query = f"""SELECT 
+                        post_title, post_body, post_id
+                    FROM
+                        posts
+                    WHERE
+                        post_id='{post_id}'
+                    AND
+                        post_body 
+                    NOT IN ('', '[removed]', '[deleted]');
+                """
+                
     post_data =  get_select_query_results(sql_query)
+    
     if not post_data:
         logging.warning('Post ID %s contains no body', post_id)
         return
@@ -227,11 +236,19 @@ def analyze_comment(comment_id):
 
     logging.info('Analyzing comment ID %s', comment_id)
 
-    sql_query = f"""SELECT comment_id, comment_body
-                    FROM comments
-                    WHERE comment_id='{comment_id}'
-                    AND comment_body NOT IN ('', '[removed]', '[deleted]');"""
+    sql_query = f"""SELECT
+                        comment_id, comment_body
+                    FROM 
+                        comments
+                    WHERE
+                        comment_id='{comment_id}'
+                    AND 
+                        comment_body
+                    NOT IN ('', '[removed]', '[deleted]');
+                """
+    
     comment_data =  get_select_query_results(sql_query)
+    
     if not comment_data:
         logging.warning('Comment ID %s contains no body', comment_id)
         return
@@ -240,6 +257,7 @@ def analyze_comment(comment_id):
     text = comment_data[0][1]
     # comment_id
     comment_id = comment_data[0][0]
+    
     try:
         language = detect(text)
         # starting at ollama 0.1.24 and .25, it hangs on greek text
@@ -540,21 +558,23 @@ def join_new_subs():
 
     # get new subs
     sql_query = """
-                    select
+                    SELECT
                         subreddit
-                    from
+                    FROM
                         posts
-                    where
-                        subreddit not in (
-                        select
+                    WHERE
+                        subreddit NOT IN (
+                        SELECT
                             subreddit
-                        from
+                        FROM
                             subscription)
-                    and subreddit not like 'u_%'
-                    group by
+                    AND subreddit NOT LIKE 'u_%'
+                    GROUP BY
                         subreddit;
                 """
+    
     new_sub_rows = get_select_query_result_dicts(sql_query)
+    
     if not new_sub_rows:
         logging.info('No new subreddits to join')
         return
