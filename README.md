@@ -91,7 +91,7 @@ graph TD;
     Node2[Debian 12
     16 Cores
     48GB RAM
-    nVidia GTX 1070ti 8GB VRAM]
+    nVidia GTX RTX3060 12GB VRAM]
     Node3[Debian 12 VM
     16 vCPU
     32GB RAM

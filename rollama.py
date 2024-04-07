@@ -559,12 +559,9 @@ def join_new_subs():
         logging.info('No new subreddits to join')
         return
 
-    for a_row in new_sub_rows:
-        if not a_row[0].startswith('u_'):
-            new_subs.append(a_row[0])
-
-    if new_subs:
-        for new_sub in new_subs:
+    if new_sub_rows:
+        for new_sub in new_sub_rows:
+            new_sub = new_sub[0]
             logging.info('Joining new sub %s', new_sub)
             try:
                 REDDIT.subreddit(new_sub).subscribe()

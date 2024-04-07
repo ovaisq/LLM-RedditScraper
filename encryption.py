@@ -5,6 +5,7 @@
     text using the Fernet cryptography library.
 """
 
+import logging
 from cryptography.fernet import Fernet
 from config import get_config
 
@@ -13,11 +14,14 @@ CONFIG = get_config()
 def load_key():
     """Loads a key used to encrypt and decrypt text.
     """
-
-    filename = CONFIG.get('service', 'ENCRYPTION_KEY')
-    with open(filename, 'rb') as key_file:
-        key = key_file.read()
-    return key
+    
+    try:
+        filename = CONFIG.get('service', 'ENCRYPTION_KEY')
+        with open(filename, 'rb') as key_file:
+            key = key_file.read()
+        return key
+    except FileNotFoundError:
+        logging.error("%s not found", filename)
 
 def encrypt_text(text):
     """Encrypts a piece of text using the loaded key.
