@@ -1,6 +1,29 @@
 --©2024, Ovais Quraishi
 CREATE DATABASE rollama;
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+DO $$
+DECLARE
+    generated_password TEXT;
+BEGIN
+    -- Generate the password and store it in the variable
+    generated_password := encode(gen_random_bytes(20), 'base64');
+
+    -- Check if the user already exists
+    IF NOT EXISTS (SELECT 1 FROM pg_user WHERE usename = 'rollama') THEN
+        -- Output the generated password
+        RAISE NOTICE 'Generated password: %', generated_password;
+
+        -- Create the user using the generated password
+        EXECUTE format('CREATE USER rollama WITH PASSWORD %L', generated_password);
+    ELSE
+        RAISE NOTICE 'User "rollama" already exists. Skipping creation.';
+    END IF;
+END $$;
+
+GRANT ALL PRIVILEGES ON DATABASE rollama TO rollama;
+GRANT SELECT, insert ON ALL TABLES IN SCHEMA public TO rollama;
+
 --Create Tables
 CREATE TABLE IF NOT EXISTS authors (
     author_id VARCHAR PRIMARY KEY,

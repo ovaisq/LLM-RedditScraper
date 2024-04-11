@@ -579,9 +579,8 @@ def join_new_subs():
         logging.info('No new subreddits to join')
         return
 
-    subs = get_vals_list_of_dicts('subreddit', new_sub_rows)
-
     if new_sub_rows:
+        subs = get_vals_list_of_dicts('subreddit', new_sub_rows)
         for new_sub in subs:
             logging.info('Joining new sub %s', new_sub)
             try:
