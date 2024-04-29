@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reddit Data Scrapper Service
+"""Reddit Data Scraper Service
     ©2024, Ovais Quraishi
 
     Collects submissions, comments for each submission, author of each submission,
