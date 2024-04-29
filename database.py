@@ -141,7 +141,7 @@ def db_get_post_ids():
     return post_id_list
 
 def db_get_comment_ids():
-    """List of post_ids, filtering out pre-analyzed post_ids from this
+    """List of comment_ids, filtering out pre-analyzed comment_ids from this
     """
 
     comment_id_list = []
