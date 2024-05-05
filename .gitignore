@@ -3,3 +3,5 @@ sonar_it.sh
 *.pem
 *.key
 __pycache__
+.scannerwork/
+.vscode/
