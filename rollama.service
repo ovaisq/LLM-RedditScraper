@@ -1,0 +1,16 @@
+[Unit]
+Description=Rollama-GPT
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/rollama/run_srvc.sh
+ExecReload=/usr/local/rollama/reload_srvc.sh
+EnvironmentFile=/usr/local/rollama/srvc_run_config.env
+User=rollama
+Group=rollama
+Restart=always
+RestartSec=3
+WorkingDirectory=/usr/local/rollama/
+
+[Install]
+WantedBy=multi-user.target

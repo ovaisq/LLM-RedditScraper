@@ -5,15 +5,9 @@
 __pycache__
 .scannerwork/
 .vscode/
+builds/
 setup.config
 sonar_it.sh
-build.sh
-install_srvc.sh
-reload_svc.sh
-run_srvc.sh
 BUILD_INFO.TXT
 ver.txt
-file_manifest.txt
 previous_ver.txt
-rollama.service
-srvc_run_config.env

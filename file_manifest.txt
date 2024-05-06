@@ -1,0 +1,17 @@
+config.py
+database.py
+encryption.py
+gptutils.py
+license.txt
+reddit_api.py
+redditutils.py
+reload_svc.sh
+requirements.txt
+rollama.py
+rollama.service
+rollama_service.py
+run_srvc.sh
+setup.config.template
+srvc_run_config.env
+utils.py
+ver.txt

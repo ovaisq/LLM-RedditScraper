@@ -144,6 +144,86 @@ graph LR
   - and all comments for each author.
 *  Subscribes to subreddit that a submission was posted to
 
+### Build
+```shell
+> pip3 install -r requirements.txt --quiet
+> ./build.sh
+
+Creating directory: builds/0.1.47
+Building rollama-0.1.47.tar
+Compressing rollama-0.1.47.tar
+rollama-0.1.47.tar.gz Done
+Build Info
+SERVICE=rollama
+VERSION=0.1.47
+PACKAGE=rollama-0.1.47.tar.gz
+PKGSHA256=e6d210ee6e9f06a269843349bd22560c856dbf0b3d8e8976a11b48762b5d4003
+SRVC_DIR=/usr/local/rollama/
+./builds/0.1.47
+
+builds
+└── 0.1.47
+    ├── BUILD_INFO.TXT
+    ├── install_srvc.sh
+    └── rollama-0.1.47.tar.gz
+```
+
+* Copy the contents of the builds/x.x.x directory over to the target machine
+```shell
+for i in install_srvc.sh *.gz BUILD_INFO.TXT
+do
+scp "$i" <remote host>:/var/tmp/
+done
+```
+* For now you have to be logged in as a root user: On the machine run 
+```shell
+> ./install_srvc.sh
+
+Install Pkg
+Group rollama already exists.
+User rollama already exists.
+Creating directory: /usr/local/rollama/
+tar xfz ./rollama-0.1.47.tar.gz -C /usr/local/rollama/ 2> /dev/null
+Setting up Service
+Creating directory: /etc/rollama/
+Created symlink /etc/systemd/system/multi-user.target.wants/rollama.service → /etc/systemd/system/rollama.service.
+```
+* Remember to edit and update **_/etc/rollama/setup.config_**
+* May want to also create SSL cert/key - copy the cert/key in the
+**_/usr/local/rollama/_** directory
+  
+* Start Service
+```shell
+> systemctl status rollama
+○ rollama.service - Rollama-GPT
+     Loaded: loaded (/etc/systemd/system/rollama.service; enabled; preset: enabled)
+     Active: inactive (dead)
+
+> systemctl start rollama
+> systemctl status rollama
+● rollama.service - Rollama-GPT
+     Loaded: loaded (/etc/systemd/system/rollama.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2024-05-02 11:22:48 PDT; 2s ago
+   Main PID: 2644 (bash)
+      Tasks: 4 (limit: 4649)
+     Memory: 87.9M
+        CPU: 534ms
+     CGroup: /system.slice/rollama.service
+             ├─2644 bash /usr/local/rollama/run_srvc.sh
+             ├─2645 /usr/bin/python3 /usr/local/bin/gunicorn rollama:app --bind 0.0.0.0:5001 --timeout 2592000 --workers 2 --log-level info
+             ├─2646 /usr/bin/python3 /usr/local/bin/gunicorn rollama:app --bind 0.0.0.0:5001 --timeout 2592000 --workers 2 --log-level info
+             └─2647 /usr/bin/python3 /usr/local/bin/gunicorn rollama:app --bind 0.0.0.0:5001 --timeout 2592000 --workers 2 --log-level info
+
+May 02 11:22:48 debian systemd[1]: Started rollama.service - Rollama-GPT.
+May 02 11:22:48 debian run_srvc.sh[2644]: SSL CERT/KEY cert.pem and key.pem not found. Running unsecured HTTP
+May 02 11:22:48 debian run_srvc.sh[2645]: [2024-05-02 11:22:48 -0700] [2645] [INFO] Starting gunicorn 22.0.0
+May 02 11:22:48 debian run_srvc.sh[2645]: [2024-05-02 11:22:48 -0700] [2645] [INFO] Listening at: http://0.0.0.0:5001 (2645)
+May 02 11:22:48 debian run_srvc.sh[2645]: [2024-05-02 11:22:48 -0700] [2645] [INFO] Using worker: sync
+May 02 11:22:48 debian run_srvc.sh[2646]: [2024-05-02 11:22:48 -0700] [2646] [INFO] Booting worker with pid: 2646
+May 02 11:22:48 debian run_srvc.sh[2647]: [2024-05-02 11:22:48 -0700] [2647] [INFO] Booting worker with pid: 2647
+
+```
+
 **Deployed as WSGI**  
 *  Uses Gunicorn WSGI
 
