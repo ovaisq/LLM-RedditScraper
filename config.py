@@ -6,7 +6,7 @@
 import configparser
 from pathlib import Path
 
-CONFIG_FILE = 'setup.config'
+CONFIG_FILE = '/etc/rollama/setup.config'
 
 def read_config(file_path):
     """Read setup config file"""
