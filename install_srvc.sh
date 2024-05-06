@@ -5,8 +5,7 @@ create_directory() {
     local DIR=$1
     if [ ! -d "$DIR" ]; then
         echo "Creating directory: ${DIR}"
-        sudo mkdir -p "${DIR}"
-        sudo chown ${USER}:${GROUP} "${DIR}"
+        mkdir -p "${DIR}"
     else
         echo "Directory ${DIR} already exists."
     fi
