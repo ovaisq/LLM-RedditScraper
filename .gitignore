@@ -9,5 +9,4 @@ builds/
 setup.config
 sonar_it.sh
 BUILD_INFO.TXT
-ver.txt
 previous_ver.txt

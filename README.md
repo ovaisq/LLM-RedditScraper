@@ -148,24 +148,27 @@ graph LR
 ```shell
 > pip3 install -r requirements.txt --quiet
 > ./build.sh
-
-Creating directory: builds/0.1.47
-Building rollama-0.1.47.tar
-Compressing rollama-0.1.47.tar
-rollama-0.1.47.tar.gz Done
+Creating directory: builds/0.1.65
+Building rollama-0.1.65.tar
+Compressing rollama-0.1.65.tar
+rollama-0.1.65.tar.gz Done
 Build Info
-SERVICE=rollama
-VERSION=0.1.47
-PACKAGE=rollama-0.1.47.tar.gz
-PKGSHA256=e6d210ee6e9f06a269843349bd22560c856dbf0b3d8e8976a11b48762b5d4003
-SRVC_DIR=/usr/local/rollama/
-./builds/0.1.47
+builds/0.1.65
+├── BUILD_INFO.TXT
+├── Dockerfile
+├── build_docker.py
+├── docker_install_srvc.sh
+├── install_srvc.sh
+├── rollama-0.1.65.tar.gz
+├── setup.config.template
+└── ver.txt
 
-builds
-└── 0.1.47
-    ├── BUILD_INFO.TXT
-    ├── install_srvc.sh
-    └── rollama-0.1.47.tar.gz
+1 directory, 8 files
+SERVICE=rollama
+VERSION=0.1.65
+PACKAGE=rollama-0.1.65.tar.gz
+PKGSHA256=cd5fa64d87afe1238e1ce65dc9212ccfb070071e370d026b453b52967c0896b5
+SRVC_DIR=/usr/local/rollama/
 ```
 
 * Copy the contents of the builds/x.x.x directory over to the target machine
