@@ -175,7 +175,19 @@ SRVC_DIR=/usr/local/rollama/
 ```shell
 scp -r builds/0.1.65 <remote host>:/var/tmp/
 ```
-
+* Update **_setup.config_** with secrets and service keys
+  * Where applicable you can generate strong secrets using **openssl**
+  ```shell
+  > openssl rand -base64 28
+  pjo2OaLXlTHXZj4jtOa+3b4JEUqcmKz7C8IJJg=
+  ```
+* For example **setup.config**
+```shell
+[service]
+...
+APP_SECRET_KEY=pjo2OaLXlTHXZj4jtOa+3b4JEUqcmKz7C8IJJg=
+...
+```
 ### Docker build (tested only on Debian 12 for now)
 ```shell
 ./build_docker.py
