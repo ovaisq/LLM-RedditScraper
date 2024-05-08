@@ -52,7 +52,12 @@ NEW_VER=$(inc_patch "ver.txt")
 
 create_directory "builds/${NEW_VER}"
 
+cp docker_install_srvc.sh "builds/${NEW_VER}"
 cp install_srvc.sh "builds/${NEW_VER}"
+cp Dockerfile "builds/${NEW_VER}"
+cp setup.config.template "builds/${NEW_VER}"
+cp ver.txt "builds/${NEW_VER}"
+cp build_docker.py "builds/${NEW_VER}"
 
 BUILD_PKG_NAME="${SRVC_NAME}-${NEW_VER}.tar"
 echo "Building $BUILD_PKG_NAME"

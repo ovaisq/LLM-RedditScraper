@@ -53,6 +53,7 @@
 import asyncio
 import json
 import logging
+import os
 
 import langdetect
 from langdetect import detect
@@ -75,16 +76,16 @@ from utils import unix_ts_str, sleep_to_avoid_429, get_vals_list_of_dicts
 
 app = Flask('ROllama-GPT')
 
-# constants
-CONFIG = get_config()
+# constants - set environment vars
+get_config()
 
 NUM_ELEMENTS_CHUNK = 25
-LLMS = CONFIG.get('service','LLMS').split(',')
+LLMS = os.environ['LLMS'].split(',')
 
 # Flask app config
 app.config.update(
-                  JWT_SECRET_KEY=CONFIG.get('service', 'JWT_SECRET_KEY'),
-                  SECRET_KEY=CONFIG.get('service', 'APP_SECRET_KEY'),
+                  JWT_SECRET_KEY=os.environ['JWT_SECRET_KEY'],
+                  SECRET_KEY=os.environ['APP_SECRET_KEY'],
                   PERMANENT_SESSION_LIFETIME=172800 #2 days
                  )
 jwt = JWTManager(app)
@@ -99,11 +100,11 @@ def login():
 
     secret = request.json.get('api_key')
 
-    if secret != CONFIG.get('service','SRVC_SHARED_SECRET'):  # if the secret matches
+    if secret != os.environ['SRVC_SHARED_SECRET']:  # if the secret matches
         return jsonify({"message": "Invalid secret"}), 401
 
     # generate access token
-    access_token = create_access_token(identity=CONFIG.get('service','IDENTITY'))
+    access_token = create_access_token(identity=os.environ['IDENTITY'])
     return jsonify(access_token=access_token), 200
 
 @app.route('/analyze_post', methods=['GET'])

@@ -6,17 +6,18 @@
 """
 
 import logging
+import os
 from cryptography.fernet import Fernet
 from config import get_config
 
-CONFIG = get_config()
+get_config()
 
 def load_key():
     """Loads a key used to encrypt and decrypt text.
     """
     
     try:
-        filename = CONFIG.get('service', 'ENCRYPTION_KEY')
+        filename = os.environ['ENCRYPTION_KEY']
         with open(filename, 'rb') as key_file:
             key = key_file.read()
         return key

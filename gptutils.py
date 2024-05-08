@@ -4,6 +4,7 @@
 
 import hashlib
 import logging
+import os
 import httpx
 
 from ollama import AsyncClient
@@ -13,7 +14,7 @@ from encryption import encrypt_text
 from utils import ts_int_to_dt_obj
 from utils import sanitize_string
 
-CONFIG = get_config()
+get_config()
 
 async def prompt_chat(llm,
                       content,
@@ -23,7 +24,7 @@ async def prompt_chat(llm,
     """
 
     dt = ts_int_to_dt_obj()
-    client = AsyncClient(host=CONFIG.get('service','OLLAMA_API_URL'))
+    client = AsyncClient(host=os.environ['OLLAMA_API_URL'])
     logging.info('Running for %s', llm)
     try:
         response = await client.chat(

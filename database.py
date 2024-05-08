@@ -9,7 +9,14 @@ from config import get_config
 
 def psql_connection():
     """Connect to PostgreSQL server"""
-    db_config = get_config()['psqldb']
+
+    db_config = {
+                 'host' : os.environ[''],
+                 'database' : os.environ['database'],
+                 'user' : os.environ['user'],
+                 'password' : os.environ['password'],
+                 'port' : os.environ['port']
+                }
     try:
         psql_conn = psycopg2.connect(**db_config)
         psql_cur = psql_conn.cursor()
@@ -20,6 +27,7 @@ def psql_connection():
 
 def execute_query(sql_query):
     """Execute a SQL query"""
+
     conn, cur = psql_connection()
     try:
         cur.execute(sql_query)
@@ -32,6 +40,7 @@ def execute_query(sql_query):
 
 def insert_data_into_table(table_name, data):
     """Insert data into table"""
+
     conn, cur = psql_connection()
     try:
         placeholders = ', '.join(['%s'] * len(data))

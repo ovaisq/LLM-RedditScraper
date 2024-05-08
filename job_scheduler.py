@@ -11,14 +11,15 @@ import requests
 import schedule
 import time
 import urllib3
+from config import get_config
+
 # disable warning for self-signed SSL cert
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+get_config()
+
 
 # Constants
-CONFIG_FILE = 'setup.config'
-CONFIG = configparser.RawConfigParser()
-CONFIG.read(CONFIG_FILE)
 
 LOGIN_HEADERS = {
                  'Content-Type' : 'application/json'
@@ -27,8 +28,8 @@ LOGIN_HEADERS = {
 def get_auth_token():
 
     end_point = 'login'
-    url = CONFIG.get('service','ENDPOINT_URL') + end_point
-    svc_shared_secret = CONFIG.get('service','SRVC_SHARED_SECRET')
+    url = os.environ['ENDPOINT_URL'] + end_point
+    svc_shared_secret = os.environ['SRVC_SHARED_SECRET']
     auth_data = {
                   'api_key' : svc_shared_secret
                  }
@@ -40,7 +41,7 @@ def get_auth_token():
     return response_json
 
 def do_get(end_point):
-    url = CONFIG.get('service','ENDPOINT_URL') + end_point
+    url = os.environ['ENDPOINT_URL'] + end_point
     auth_token = get_auth_token()
     headers = {
                'Authorization' : f'Bearer {auth_token}'
