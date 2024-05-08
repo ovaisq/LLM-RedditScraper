@@ -67,5 +67,5 @@ SRVC_CONFIG_FILE=${SRVC_DIR}/srvc_run_config.env
 load_config_file "${SRVC_CONFIG_FILE}"
 
 echo "Setting up Service"
-pip3 install -r ${SRVC_DIR}/requirements.txt --quiet
+pip3 install -r ${SRVC_DIR}/requirements.txt --quiet --root-user-action=ignore
 create_directory "${SRVC_CONFIG_DIR}"
