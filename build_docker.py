@@ -53,7 +53,8 @@ def build_docker_container(dockerfile_path, image_name, tag="latest", build_args
             path=dockerfile_path,
             tag=f"{image_name}:{tag}",
             rm=True,
-            buildargs=build_args
+            buildargs=build_args,
+            quiet=True
         )
 
         for log in logs:
