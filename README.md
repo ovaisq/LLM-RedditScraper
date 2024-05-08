@@ -173,11 +173,20 @@ SRVC_DIR=/usr/local/rollama/
 
 * Copy the contents of the builds/x.x.x directory over to the target machine
 ```shell
-for i in install_srvc.sh *.gz BUILD_INFO.TXT
-do
-scp "$i" <remote host>:/var/tmp/
-done
+scp -r builds/0.1.65 <remote host>:/var/tmp/
 ```
+
+### Docker build (tested only on Debian 12 for now)
+```shell
+./build_docker.py
+Building Docker image rollama:0.1.65 from /var/tmp/0.1.65...
+sha256:275958fcd3a7a049cc465fbe556802ba40d8cf9fff58ffd4da0593b85d5dca1a
+Docker image rollama:0.1.65 built successfully!
+```
+
+**OR**
+
+### SYSTEMD install on a Debian 12 host
 * For now you have to be logged in as a root user: On the machine run 
 ```shell
 > ./install_srvc.sh
