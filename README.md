@@ -46,7 +46,7 @@ flowchart TD
             subgraph OLLAMA
                 subgraph blank4[ ]
                     LLM1[deepseek-llm]
-                    LLM2[llama2]
+                    LLM2[llama3]
                     LLM3[gemma]
                 end
             end
@@ -325,9 +325,9 @@ Environment="OLLAMA_HOST=0.0.0.0"
   ```shell
   > brew services stop ollama && brew services start ollama
   ```
-* Add following models to ollama-gpt: deepseek-llm,llama2,llama-pro 
+* Add following models to ollama-gpt: deepseek-llm,llama3,llama-pro 
   ```shell
-  > for llm in deepseek-llm llama2 llama-pro gemma
+  > for llm in deepseek-llm llama3 llama-pro gemma
     do
         ollama pull ${llm}
     done
