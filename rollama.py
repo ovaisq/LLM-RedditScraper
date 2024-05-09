@@ -663,9 +663,9 @@ if __name__ == "__main__":
     app.logger.setLevel(gunicorn_logger.level)
 
     # non-production WSGI settings:
-    #  port 5000, listen to local ip address, use ssl
+    #  port 5001, listen to local ip address, use ssl
     # in production we use gunicorn
-    app.run(port=5000,
+    app.run(port=5001,
             host='0.0.0.0',
             ssl_context=('cert.pem', 'key.pem'),
             debug=False) # not for production

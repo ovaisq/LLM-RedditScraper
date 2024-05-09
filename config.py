@@ -7,12 +7,17 @@ import configparser
 import os
 from pathlib import Path
 
+# override option transformation to preserve case
+class CaseSensitiveConfigParser(configparser.RawConfigParser):
+    def optionxform(self, optionstr):
+                return optionstr
+
 CONFIG_FILE = 'setup.config'
 
 def read_config(file_path):
     """Read setup config file"""
     if Path(str(Path(file_path).resolve())).exists():
-        config_obj = configparser.RawConfigParser()
+        config_obj = CaseSensitiveConfigParser()
         config_obj.read(file_path)
         # Loop through each section in the config file
         for section_name, options in config_obj.items():

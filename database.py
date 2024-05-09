@@ -3,15 +3,22 @@
 """DB Utils
 """
 
+import ast
+import json
 import logging
+import markdown
+import os
 import psycopg2
+from psycopg2.extras import RealDictCursor
 from config import get_config
 
-def psql_connection():
+get_config()
+
+def psql_connection(cursorfactory=None):
     """Connect to PostgreSQL server"""
 
     db_config = {
-                 'host' : os.environ[''],
+                 'host' : os.environ['host'],
                  'database' : os.environ['database'],
                  'user' : os.environ['user'],
                  'password' : os.environ['password'],
@@ -19,7 +26,7 @@ def psql_connection():
                 }
     try:
         psql_conn = psycopg2.connect(**db_config)
-        psql_cur = psql_conn.cursor()
+        psql_cur = psql_conn.cursor(cursor_factory=cursorfactory)
         return psql_conn, psql_cur
     except psycopg2.Error as e:
         logging.error("Error connecting to PostgreSQL: %s", e)
@@ -136,9 +143,9 @@ def db_get_post_ids():
                                        WHERE analysis_document ->> 'post_id' IS NOT NULL
                                        GROUP BY pid)
                    AND post_id NOT IN (SELECT analysis_document ->> 'reference_id' AS RID
-                   					   from analysis_documents
-                   					   WHERE analysis_document ->> 'reference_id' IS NOT NULL
-                   					   group by RID);"""
+                                       from analysis_documents
+                                       WHERE analysis_document ->> 'reference_id' IS NOT NULL
+                                       group by RID);"""
     post_ids = get_select_query_results(sql_query)
     if not post_ids:
         logging.warning("db_get_post_ids(): no post_ids found in DB")
@@ -174,3 +181,36 @@ def db_get_comment_ids():
         comment_id_list.append(a_comment_id[0])
 
     return comment_id_list
+
+def db_get_post_n_analyzed_docs(post_id):
+    """Retrieve the post body and any or all GPT responses related to the post,
+        for a specific post_id. Returns a dictionary. Text is
+        rendered to html for the convenience of UI rendering.
+    """
+
+    sql_query = f"""
+                    SELECT
+                        MAX(p.post_body)as post ,
+                        array_to_string(array_agg(ad.analysis_document),
+                        ', ') as analysis_docs
+                    from
+                        public.posts p
+                    join public.analysis_documents ad on
+                        p.post_id = (ad.analysis_document->>'reference_id')::varchar
+                    where
+                        p.post_id = '{post_id}';
+                """
+    conn, cur = psql_connection(RealDictCursor)
+
+    try:
+        cur.execute(sql_query)
+        result = cur.fetchone()
+        conn.close()
+    except psycopg2.Error as e:
+        logging.error("Error connecting to PostgreSQL: %s", e)
+        raise
+
+    return {
+            'post': markdown.markdown(result['post']),
+            'analysis_docs': [dict({**row, 'analysis': markdown.markdown(row['analysis'])}) for row in ast.literal_eval(result['analysis_docs'])]
+           }
