@@ -1,3 +1,4 @@
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +14,7 @@
     <div>
         {% for doc in data.analysis_docs %}
             <div>
-                <h3>{{ doc.source }}</h3>
+                <h3>{{ doc.llm }}</h3>
                 <p>{{ doc.analysis | safe }}</p>
             </div>
         {% endfor %}
