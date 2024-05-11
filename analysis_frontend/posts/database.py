@@ -189,7 +189,7 @@ def db_get_post_n_analyzed_docs(cursorfactory=None):
     """
 
     sql_query = f"""
-SELECT 
+                    SELECT 
                         p.subreddit,
                         MAX(p.post_title || ' - ' || p.post_body) AS post,
                         array_to_string(array_agg(ad.analysis_document), ', ') as analysis_docs
