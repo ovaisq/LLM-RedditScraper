@@ -190,6 +190,7 @@ def db_get_post_n_analyzed_docs(post_id):
 
     sql_query = f"""
                     SELECT 
+                        p.subreddit,
                         MAX(p.post_title || ' - ' || p.post_body) AS post,
                         array_to_string(array_agg(ad.analysis_document), ', ') as analysis_docs
                     FROM 
@@ -197,7 +198,9 @@ def db_get_post_n_analyzed_docs(post_id):
                     JOIN 
                         public.analysis_documents ad ON p.post_id = (ad.analysis_document->>'reference_id')::varchar
                     WHERE 
-                        p.post_id = '{post_id}';
+                        p.post_id = '{post_id}'
+                    GROUP BY
+                        p.subreddit;
                 """
     conn, cur = psql_connection(RealDictCursor)
 
@@ -210,6 +213,7 @@ def db_get_post_n_analyzed_docs(post_id):
         raise
     if result['post']:
         return {
+                'subreddit': result['subreddit'],
                 'post': markdown.markdown(result['post']),
                 'analysis_docs': [dict({**row, 'analysis': markdown.markdown(row['analysis'])}) for row in ast.literal_eval(result['analysis_docs'])]
                }
