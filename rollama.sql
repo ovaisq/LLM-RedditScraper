@@ -110,3 +110,8 @@ CREATE INDEX IF NOT EXISTS post_subreddit_idx ON public.posts USING btree (
 CREATE INDEX IF NOT EXISTS subscription_subreddit_idx ON public."subscription" (
     subreddit
 );
+CREATE INDEX idx_posts_post_id ON public.posts (post_id);
+CREATE INDEX idx_analysis_documents_reference_id ON public.analysis_documents (
+	(analysis_document->>'reference_id')
+); 
+

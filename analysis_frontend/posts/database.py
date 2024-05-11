@@ -188,26 +188,24 @@ def db_get_post_n_analyzed_docs(cursorfactory=None):
         rendered to html for the convenience of UI rendering.
     """
 
-    sql_query = f"""
-                    SELECT 
-                        p.subreddit,
-                        MAX(p.post_title || ' - ' || p.post_body) AS post,
-                        array_to_string(array_agg(ad.analysis_document), ', ') as analysis_docs
-                    FROM 
-                        public.posts p
-                    JOIN 
-                        public.analysis_documents ad ON p.post_id = (ad.analysis_document->>'reference_id')::varchar
-                    WHERE 
-                        p.post_id = (SELECT
-                                        ad.analysis_document ->> 'reference_id' as pid
-                                     FROM 
-                                        analysis_documents ad 
-                                     WHERE 
-                                        ad.analysis_document ->> 'category' = 'post' 
-                                     ORDER BY 
-                                        random() LIMIT 1)
-                    GROUP BY
-                        p.subreddit;
+    sql_query = """
+                WITH random_post AS (
+                                     SELECT ad. analysis_document->>'reference_id' as pid
+                                     FROM analysis_documents ad
+                                     WHERE ad.analysis_document->>'category' = 'post'
+                                     ORDER BY random() LIMIT 1
+                                    )
+                SELECT 
+                    p.subreddit,
+                    MAX(p.post_title || '  -  ' || p.post_body) AS post,
+                    array_to_string(array_agg(ad.analysis_document), ', ') as analysis_docs
+                FROM public.posts p
+                JOIN public.analysis_documents ad ON p.post_id = (ad.analysis_document->>'reference_id')::varchar
+                WHERE p.post_id IN (
+                                    SELECT pid FROM random_post
+                                    )
+                    AND p.post_body NOT LIKE '[ Removed by Reddit ]%'
+                GROUP BY p.subreddit;
                 """
     conn, cur = psql_connection(cursorfactory=RealDictCursor)
 
