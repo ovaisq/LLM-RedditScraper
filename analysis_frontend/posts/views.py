@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from . import database
-results = database.db_get_post_n_analyzed_docs('1b0xd1e')
+
 def post_detail(request):
+    results = database.db_get_post_n_analyzed_docs()
     data = {}
     if results:
       data = results

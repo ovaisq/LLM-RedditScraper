@@ -182,8 +182,8 @@ def db_get_comment_ids():
 
     return comment_id_list
 
-def db_get_post_n_analyzed_docs(post_id):
-    """Retrieve the post body and any or all GPT responses related to the post,
+def db_get_post_n_analyzed_docs():
+    """Retrieve a random post body and any or all GPT responses related to the post,
         for a specific post_id. Returns a dictionary. Text is
         rendered to html for the convenience of UI rendering.
     """
@@ -198,7 +198,14 @@ def db_get_post_n_analyzed_docs(post_id):
                     JOIN 
                         public.analysis_documents ad ON p.post_id = (ad.analysis_document->>'reference_id')::varchar
                     WHERE 
-                        p.post_id = '{post_id}'
+                        p.post_id = (SELECT
+                                        ad.analysis_document ->> 'reference_id' as pid
+                                     FROM 
+                                        analysis_documents ad 
+                                     WHERE 
+                                        ad.analysis_document ->> 'category' = 'post' 
+                                     ORDER BY 
+                                        random() LIMIT 1)
                     GROUP BY
                         p.subreddit;
                 """
