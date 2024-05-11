@@ -5,19 +5,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post Detail</title>
+    <style>
+        body {
+            display: flex;
+        }
+        
+        #left-column {
+            width: 30%;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            background-color: lightgray;
+        }
+        
+        #right-column {
+            width: 70%;
+            margin-left: 30%;
+            padding: 1em;
+            overflow-y: scroll;
+            background-color: lightblue;
+        }
+    </style>
 </head>
 <body>
-    <h1>Post Body</h1>
-    <p>{{ data.post | safe }}</p>
-    
-    <h2>Analysis Documents</h2>
-    <div>
-        {% for doc in data.analysis_docs %}
-            <div>
-                <h3>{{ doc.llm }}</h3>
-                <p>{{ doc.analysis | safe }}</p>
-            </div>
-        {% endfor %}
+    <div style="display: flex;">
+        <div id="left-column"><h2>Post Body</h2><i><p>{{ data.post | safe }}</p></i></div>
+        <div id="right-column"><h2>Analysis Documents</h2>     {% for doc in data.analysis_docs %}
+            <h3>{{ doc.llm }}</h3>
+            <p>{{ doc.analysis | safe }}</p>
+    {% endfor %}</div>
     </div>
 </body>
 </html>
