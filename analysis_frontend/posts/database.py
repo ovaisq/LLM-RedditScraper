@@ -182,14 +182,14 @@ def db_get_comment_ids():
 
     return comment_id_list
 
-def db_get_post_n_analyzed_docs():
+def db_get_post_n_analyzed_docs(cursorfactory=None):
     """Retrieve a random post body and any or all GPT responses related to the post,
         for a specific post_id. Returns a dictionary. Text is
         rendered to html for the convenience of UI rendering.
     """
 
     sql_query = f"""
-                    SELECT 
+SELECT 
                         p.subreddit,
                         MAX(p.post_title || ' - ' || p.post_body) AS post,
                         array_to_string(array_agg(ad.analysis_document), ', ') as analysis_docs
@@ -209,12 +209,13 @@ def db_get_post_n_analyzed_docs():
                     GROUP BY
                         p.subreddit;
                 """
-    conn, cur = psql_connection(RealDictCursor)
+    conn, cur = psql_connection(cursorfactory=RealDictCursor)
 
     try:
         cur.execute(sql_query)
         result = cur.fetchone()
         conn.close()
+        print(result)
     except psycopg2.Error as e:
         logging.error("Error connecting to PostgreSQL: %s", e)
         raise
