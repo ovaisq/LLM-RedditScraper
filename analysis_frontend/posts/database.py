@@ -213,7 +213,6 @@ def db_get_post_n_analyzed_docs(cursorfactory=None):
         cur.execute(sql_query)
         result = cur.fetchone()
         conn.close()
-        print(result)
     except psycopg2.Error as e:
         logging.error("Error connecting to PostgreSQL: %s", e)
         raise
@@ -223,5 +222,71 @@ def db_get_post_n_analyzed_docs(cursorfactory=None):
                 'post': markdown.markdown(result['post']),
                 'analysis_docs': [dict({**row, 'analysis': markdown.markdown(row['analysis'])}) for row in ast.literal_eval(result['analysis_docs'])]
                }
+    else:
+        return False
+
+def deb_get_post_analysis_comments(cursorfactory=None):
+    """Retrieve a random post body and any or all GPT responses related to the post,
+        for a specific post_id. Returns a dictionary. Text is
+        rendered to html for the convenience of UI rendering.
+    """
+
+    sql_query = """
+                WITH random_post AS (
+                    SELECT ad.analysis_document->>'reference_id' as pid
+                    FROM analysis_documents ad
+                    WHERE ad.analysis_document->>'category' = 'post'
+                    ORDER BY random() LIMIT 1
+                ), post_comments AS (
+                    SELECT
+                        c.post_id,
+                        array_agg(c.comment_body) AS comment_bodies
+                    FROM
+                        public.comments c
+                    WHERE
+                        c.post_id IN (SELECT pid FROM random_post)
+                    GROUP BY
+                        c.post_id
+                )
+                SELECT 
+                    p.subreddit,
+                    MAX(p.post_title || '  -  ' || p.post_body) AS post,
+                    array_to_string(array_agg(ad.analysis_document), ', ') as analysis_docs,
+                    pc.comment_bodies
+                FROM 
+                    public.posts p
+                JOIN 
+                    public.analysis_documents ad ON p.post_id = (ad.analysis_document->>'reference_id')::varchar
+                LEFT JOIN
+                    post_comments pc ON p.post_id = pc.post_id
+                WHERE 
+                    p.post_id IN (SELECT pid FROM random_post)
+                    AND p.post_body NOT LIKE '[ Removed by Reddit ]%'
+                    AND pc.comment_bodies NOTNULL
+                GROUP BY 
+                    p.subreddit, pc.comment_bodies;
+                """
+    conn, cur = psql_connection(cursorfactory=RealDictCursor)
+
+    try:
+        cur.execute(sql_query)
+        result = cur.fetchone()
+        conn.close()
+    except psycopg2.Error as e:
+        logging.error("Error connecting to PostgreSQL: %s", e)
+        raise
+
+    if result:
+        # Convert markdown to HTML for UI rendering
+        post_html = markdown.markdown(result['post'])
+        # Convert analysis docs to list of dictionaries with analysis converted to HTML
+        analysis_docs = [dict({**row, 'analysis': markdown.markdown(row['analysis'])}) for row in ast.literal_eval(result['analysis_docs'])]
+        new_list = [markdown.markdown(text, escape=False) for text in result['comment_bodies']]
+        return {
+            'subreddit': result['subreddit'],
+            'post': post_html,
+            'analysis_docs': analysis_docs,
+            'comment_bodies': new_list  # Including comment bodies in the result
+        }
     else:
         return False

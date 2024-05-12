@@ -2,7 +2,7 @@ from django.shortcuts import render
 from . import database
 
 def post_detail(request):
-    results = database.db_get_post_n_analyzed_docs('RealDictCursor')
+    results = database.deb_get_post_analysis_comments('RealDictCursor')
     data = {}
     if results:
       data = results

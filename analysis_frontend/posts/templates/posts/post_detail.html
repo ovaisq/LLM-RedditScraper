@@ -10,7 +10,7 @@
             display: flex;
         }
         
-        #left-column {
+        #post-column {
             width: 30%;
             position: fixed;
             left: 0;
@@ -19,22 +19,38 @@
             background-color: lightgray;
         }
         
-        #right-column {
+        #analysis-column {
             width: 70%;
             margin-left: 30%;
             padding: 1em;
-            overflow-y: scroll;
+            overflow-y: auto;
+            background-color: lightblue;
+        }
+        #comments-column {
+            width: 70%;
+            margin-left: .3%;
+            padding: 1em;
+            overflow-y: auto;
             background-color: lightblue;
         }
     </style>
 </head>
 <body>
     <div style="display: flex;">
-        <div id="left-column"><h3>Subreddit</h3><p>{{ data.subreddit | safe }}</p><h3>Post Body</h3><i><p>{{ data.post | safe }}</p></i></div>
-        <div id="right-column"><h3>Analysis Documents</h3>{% for doc in data.analysis_docs %}
+        <div id="post-column"><h3>Subreddit</h3><p>{{ data.subreddit | safe }}</p><h3>Post Body</h3><i><p>{{ data.post | safe }}</p></i></div>
+        <div id="analysis-column"><h3>Analysis Documents</h3>{% for doc in data.analysis_docs %}
             <b>{{ doc.llm }}</b>
             <p>{{ doc.analysis | safe }}</p>
             {% endfor %}
+        </div>
+        <div id="comments-column">
+            <h3>Comments</h3>
+            {% for comment in data.comment_bodies %}
+            <div>
+                <b>Comment {{ forloop.counter }}</b>
+                <p>{{ comment | safe }}</p>
+            </div>
+        {% endfor %}
         </div>
     </div>
 </body>
