@@ -1,0 +1,39 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Counts</title>
+    <style>
+        body {
+            display: flex;
+            background-color: lightblue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Database Counts</h1>
+    <p>
+    <table border="-1">
+        <tr><th>Table Name</th><th>Rows</th></tr>
+        {% for item in data %}
+        <tr>
+            <td><b>{{ item.table_name | safe }}</b></td>
+            <td>{{ item.rows_n | safe}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    </p>
+</body>
+</html>
+
+
+
+
+
+
+
+ 
+
+

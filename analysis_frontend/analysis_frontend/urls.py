@@ -17,8 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from posts.views import post_detail
+from posts.views import row_counts
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('post-detail/', post_detail, name='post_detail'),
+    path('counts/', row_counts, name='counts'),
 ]

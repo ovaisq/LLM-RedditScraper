@@ -290,3 +290,21 @@ def deb_get_post_analysis_comments(cursorfactory=None):
         }
     else:
         return False
+
+sql_query = """
+                WITH tbl AS (
+                             SELECT table_schema, table_name
+                             FROM information_schema.tables
+                             WHERE table_name NOT LIKE 'pg_%' AND table_schema IN ('public')
+                            )
+                SELECT
+                  table_name,
+                  (xpath('/row/c/text()',
+                  query_to_xml(format('SELECT count(*) AS c FROM %I.%I', table_schema, table_name),
+                  false,
+                  true,
+                  '')))[1]::text::int AS rows_n
+                FROM tbl ORDER BY 2 DESC;
+                """
+results = get_select_query_result_dicts(sql_query)
+print(results)
