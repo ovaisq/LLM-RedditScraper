@@ -39,11 +39,11 @@ inc_patch() {
 
 # Main script starts here
 
-SRVC_NAME="rollama"
+SRVC_NAME="rollama-FE"
 TOP_LEVEL_DIR="frontend/analysis_frontend"
 BUILD_DIR="builds/FE_$(inc_patch "${TOP_LEVEL_DIR}/ver.txt")"
 NEW_VER=$(cat "${TOP_LEVEL_DIR}/ver.txt")
-BUILD_PKG_NAME="${SRVC_NAME}-FE-${NEW_VER}.tar.gz"
+BUILD_PKG_NAME="${SRVC_NAME}-${NEW_VER}.tar.gz"
 
 # Create build directory if it doesn't exist
 create_directory "$BUILD_DIR"

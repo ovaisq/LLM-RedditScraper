@@ -61,7 +61,7 @@ for file in "${files_to_copy[@]}"; do
 done
 
 # Build package name
-build_pkg_name="${SRVC_NAME}-BE-${new_ver}.tar.gz"
+build_pkg_name="${SRVC_NAME}-${new_ver}.tar.gz"
 echo "Building $build_pkg_name"
 tar -czf "${build_pkg_name}" $(<file_manifest.txt)
 echo "Compressing $build_pkg_name"
