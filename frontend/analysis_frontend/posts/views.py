@@ -1,4 +1,7 @@
 from django.shortcuts import render
+from django.contrib.auth import login, authenticate
+from django.shortcuts import render, redirect
+
 from . import database
 
 def post_detail(request):

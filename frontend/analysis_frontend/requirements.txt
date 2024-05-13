@@ -1,0 +1,3 @@
+Django
+Markdown
+psycopg2_binary
