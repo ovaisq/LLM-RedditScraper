@@ -9,6 +9,7 @@ builds/
 setup.config
 sonar_it.sh
 BUILD_INFO.TXT
+FE_BUILD_INFO.TXT
 previous_ver.txt
 .DS_Store
 
