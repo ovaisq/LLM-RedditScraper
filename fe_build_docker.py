@@ -71,7 +71,7 @@ def build_docker_container(dockerfile_path, image_name, tag="latest", build_args
 
 if __name__ == "__main__":
     dockerfile_path = str(Path().absolute())
-    image_name = "rollama"
+    image_name = "rollamaui"
     tag = get_ver()
 
     build_docker_container(dockerfile_path, image_name, tag, get_config())

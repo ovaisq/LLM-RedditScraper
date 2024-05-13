@@ -39,7 +39,7 @@ inc_patch() {
 
 # Main script starts here
 
-SRVC_NAME="rollama-FE"
+SRVC_NAME="rollamaui"
 TOP_LEVEL_DIR="frontend/analysis_frontend"
 BUILD_DIR="builds/FE_$(inc_patch "${TOP_LEVEL_DIR}/ver.txt")"
 NEW_VER=$(cat "${TOP_LEVEL_DIR}/ver.txt")
@@ -49,7 +49,9 @@ BUILD_PKG_NAME="${SRVC_NAME}-${NEW_VER}.tar.gz"
 create_directory "$BUILD_DIR"
 
 # Copy necessary files to build directory
-cp -f fe_docker_install_srvc.sh FE_Dockerfile fe_build_docker.py "${TOP_LEVEL_DIR}/ver.txt" "$BUILD_DIR"
+cp -f fe_run.sh fe_docker_install_srvc.sh FE_Dockerfile fe_build_docker.py "${TOP_LEVEL_DIR}/ver.txt" "${TOP_LEVEL_DIR}/requirements.txt" "$BUILD_DIR"
+
+mv "$BUILD_DIR"/FE_Dockerfile "$BUILD_DIR"/Dockerfile
 
 # Build the package
 echo "Building $BUILD_PKG_NAME"
@@ -60,6 +62,7 @@ tar -czf "$BUILD_PKG_NAME" \
     --exclude='.log' \
     --exclude='.pot' \
     --exclude='.pyc' \
+	--exclude=requirements.txt \
     --exclude=setup.config \
     -C "${TOP_LEVEL_DIR}/.." analysis_frontend
 

@@ -46,23 +46,22 @@ load_config_file() {
     fi
 }
 
+# load build info
+APP_DIR="/app/"
+BUILD_INFO=FE_BUILD_INFO.TXT
+load_config_file "${BUILD_INFO}"
+
 echo "Install Pkg"
 # user and group name is same as service name
 GROUP="rollama"
 USER="rollama"
-APP_DIR="/app"
 
 check_and_create_group "${GROUP}"
 check_and_create_user "${USER}" "${GROUP}"
-create_directory "${APP_DIR}"
 
-echo "tar xfz ./${PACKAGE} -C ${APP_DIR} 2> /dev/null"
-tar xfz ./${PACKAGE} -C ${APP_DIR} 2> /dev/null
-
-# load service config file
-SRVC_CONFIG_FILE=${APP_DIR}/srvc_run_config.env
-load_config_file "${SRVC_CONFIG_FILE}"
+cd ${APP_DIR}
+echo "tar xfz ./${PACKAGE} 2> /dev/null"
+tar xfz ./${PACKAGE} 2> /dev/null
 
 echo "Setting up Service"
 pip3 install -r ${APP_DIR}/requirements.txt --quiet --root-user-action=ignore
-create_directory "${SRVC_CONFIG_DIR}"

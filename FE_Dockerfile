@@ -12,6 +12,9 @@ RUN apt-get -qqq update && \
     pip3 install --upgrade pip setuptools wheel --quiet --root-user-action=ignore
 
 # Copy necessary files to /app directory
+COPY requirements.txt /app/
+COPY fe_run.sh /app/
+COPY *.TXT /app/
 COPY *.gz /app/
 COPY fe_docker_install_srvc.sh /app/
 
@@ -34,5 +37,5 @@ ENV user $user
 ARG password
 ENV password $password
 
-# Run ROllama Run!
-CMD ["/usr/local/fe_docker_run_srvc.sh"]
+# Run ROllama FE Run!
+CMD ["/app/fe_run.sh"]
