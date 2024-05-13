@@ -10,6 +10,7 @@ setup.config
 sonar_it.sh
 BUILD_INFO.TXT
 previous_ver.txt
+.DS_Store
 
 # Django #
 *.log

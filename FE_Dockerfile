@@ -1,0 +1,38 @@
+# Use Debian Bookworm as the base image
+FROM bitnami/minideb:bookworm
+
+WORKDIR /app/
+
+# Debian 12 thing
+ENV PIP_BREAK_SYSTEM_PACKAGES 1
+
+# Install Python3 and required packages using Apt
+RUN apt-get -qqq update && \
+    apt-get -qqq install -y python3 python3-pip && \
+    pip3 install --upgrade pip setuptools wheel --quiet --root-user-action=ignore
+
+# Copy necessary files to /app directory
+COPY *.gz /app/
+COPY fe_docker_install_srvc.sh /app/
+
+
+# Execute installation script
+RUN /app/fe_docker_install_srvc.sh
+
+# Expose port 8000
+EXPOSE 8000
+
+# Env vars
+ARG host
+ENV host $host
+ARG port
+ENV port $port
+ARG database
+ENV database $database
+ARG user
+ENV user $user
+ARG password
+ENV password $password
+
+# Run ROllama Run!
+CMD ["/usr/local/fe_docker_run_srvc.sh"]

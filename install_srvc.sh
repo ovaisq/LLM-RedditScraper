@@ -58,6 +58,9 @@ check_and_create_group "${GROUP}"
 check_and_create_user "${USER}" "${GROUP}"
 create_directory "${SRVC_DIR}"
 
+echo "sha256sum "${PKG_NAME}" | awk '{print $1}'"
+sha256sum "${PKG_NAME}" | awk '{print $1}'
+
 echo "tar xfz ./${PACKAGE} -C ${SRVC_DIR} 2> /dev/null"
 tar xfz ./${PACKAGE} -C ${SRVC_DIR} 2> /dev/null
 
