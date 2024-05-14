@@ -554,7 +554,7 @@ def join_new_subs():
     """
 
     logging.info('Joining New Subs')
-    new_subs = []
+
     dt = unix_ts_str()
 
     # get new subs

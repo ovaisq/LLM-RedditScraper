@@ -36,64 +36,51 @@ def execute_query(sql_query):
     """Execute a SQL query"""
 
     conn, cur = psql_connection()
-    try:
-        cur.execute(sql_query)
-        result = cur.fetchall()
-        conn.close()
-        return result
-    except psycopg2.Error as e:
-        logging.error("%s", e)
-        raise
+    cur.execute(sql_query)
+    result = cur.fetchall()
+    conn.close()
+    return result
 
 def insert_data_into_table(table_name, data):
     """Insert data into table"""
 
     conn, cur = psql_connection()
-    try:
-        placeholders = ', '.join(['%s'] * len(data))
-        columns = ', '.join(data.keys())
-        # Since the table keys that matter are set to UNIQUE value,
-        #   I find the ON CONFLICT DO NOTHING more effecient than
-        #   doing a lookup before INSERT. This way original content
-        #   is preserved by default. In case of updating existing
-        #   data, one can write a method to safely update data
-        #   while also preserving original data. For example use
-        #   ON CONFLICT DO UPDATE. For now this'd do.
-        sql_query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders}) \
-                     ON CONFLICT DO NOTHING;"
-        cur.execute(sql_query, list(data.values()))
-        conn.commit()
-    except psycopg2.Error as e:
-        logging.error("%s", e)
-        raise
+
+    placeholders = ', '.join(['%s'] * len(data))
+    columns = ', '.join(data.keys())
+    # Since the table keys that matter are set to UNIQUE value,
+    #   I find the ON CONFLICT DO NOTHING more effecient than
+    #   doing a lookup before INSERT. This way original content
+    #   is preserved by default. In case of updating existing
+    #   data, one can write a method to safely update data
+    #   while also preserving original data. For example use
+    #   ON CONFLICT DO UPDATE. For now this'd do.
+    sql_query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders}) \
+                    ON CONFLICT DO NOTHING;"
+    cur.execute(sql_query, list(data.values()))
+    conn.commit()
 
 def get_select_query_results(sql_query):
     """Execute a query, return all rows for the query
     """
 
     conn, cur = psql_connection()
-    try:
-        cur.execute(sql_query)
-        result = cur.fetchall()
-        conn.close()
-        return result
-    except psycopg2.Error as e:
-        logging.error("%s", e)
-        raise
+
+    cur.execute(sql_query)
+    result = cur.fetchall()
+    conn.close()
+    return result
 
 def get_select_query_result_dicts(sql_query):
     """Execute a query, return all rows for the query as list of dictionaries"""
 
     conn, cur = psql_connection()
-    try:
-        cur.execute(sql_query)
-        columns = [desc[0] for desc in cur.description]  # Fetch column names
-        result = [dict(zip(columns, row)) for row in cur.fetchall()]
-        conn.close()
-        return result
-    except psycopg2.Error as e:
-        logging.error("%s", e)
-        raise
+
+    cur.execute(sql_query)
+    columns = [desc[0] for desc in cur.description]  # Fetch column names
+    result = [dict(zip(columns, row)) for row in cur.fetchall()]
+    conn.close()
+    return result
 
 def get_new_data_ids(table_name, unique_column, reddit_data):
     """Get object ids for new messages on reddit
@@ -182,49 +169,6 @@ def db_get_comment_ids():
 
     return comment_id_list
 
-def db_get_post_n_analyzed_docs(cursorfactory=None):
-    """Retrieve a random post body and any or all GPT responses related to the post,
-        for a specific post_id. Returns a dictionary. Text is
-        rendered to html for the convenience of UI rendering.
-    """
-
-    sql_query = """
-                WITH random_post AS (
-                                     SELECT ad. analysis_document->>'reference_id' as pid
-                                     FROM analysis_documents ad
-                                     WHERE ad.analysis_document->>'category' = 'post'
-                                     ORDER BY random() LIMIT 1
-                                    )
-                SELECT 
-                    p.subreddit,
-                    MAX(p.post_title || '  -  ' || p.post_body) AS post,
-                    array_to_string(array_agg(ad.analysis_document), ', ') as analysis_docs
-                FROM public.posts p
-                JOIN public.analysis_documents ad ON p.post_id = (ad.analysis_document->>'reference_id')::varchar
-                WHERE p.post_id IN (
-                                    SELECT pid FROM random_post
-                                    )
-                    AND p.post_body NOT LIKE '[ Removed by Reddit ]%'
-                GROUP BY p.subreddit;
-                """
-    conn, cur = psql_connection(cursorfactory=RealDictCursor)
-
-    try:
-        cur.execute(sql_query)
-        result = cur.fetchone()
-        conn.close()
-    except psycopg2.Error as e:
-        logging.error("Error connecting to PostgreSQL: %s", e)
-        raise
-    if result['post']:
-        return {
-                'subreddit': result['subreddit'],
-                'post': markdown.markdown(result['post']),
-                'analysis_docs': [dict({**row, 'analysis': markdown.markdown(row['analysis'])}) for row in ast.literal_eval(result['analysis_docs'])]
-               }
-    else:
-        return False
-
 def deb_get_post_analysis_comments(cursorfactory=None):
     """Retrieve a random post body and any or all GPT responses related to the post,
         for a specific post_id. Returns a dictionary. Text is
@@ -266,22 +210,19 @@ def deb_get_post_analysis_comments(cursorfactory=None):
                 GROUP BY 
                     p.subreddit, pc.comment_bodies;
                 """
-    conn, cur = psql_connection(cursorfactory=RealDictCursor)
 
-    try:
-        cur.execute(sql_query)
-        result = cur.fetchone()
-        conn.close()
-    except psycopg2.Error as e:
-        logging.error("Error connecting to PostgreSQL: %s", e)
-        raise
+    conn, cur = psql_connection(cursorfactory=cursorfactory)
+
+    cur.execute(sql_query)
+    result = cur.fetchone()
+    conn.close()
 
     if result:
         # Convert markdown to HTML for UI rendering
         post_html = markdown.markdown(result['post'])
         # Convert analysis docs to list of dictionaries with analysis converted to HTML
         analysis_docs = [dict({**row, 'analysis': markdown.markdown(row['analysis'])}) for row in ast.literal_eval(result['analysis_docs'])]
-        new_list = [markdown.markdown(text, escape=False) for text in result['comment_bodies']]
+        new_list = [markdown.markdown(text) for text in result['comment_bodies']]
         return {
             'subreddit': result['subreddit'],
             'post': post_html,

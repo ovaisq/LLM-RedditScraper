@@ -49,7 +49,7 @@ def build_docker_container(dockerfile_path, image_name, tag="latest", build_args
     client = docker.from_env()
     try:
         print(f"Building Docker image {image_name}:{tag} from {dockerfile_path}...")
-        image, logs = client.images.build(
+        _, logs = client.images.build(
             path=dockerfile_path,
             tag=f"{image_name}:{tag}",
             rm=True,

@@ -9,6 +9,7 @@ ENV PIP_BREAK_SYSTEM_PACKAGES 1
 # Install Python3 and required packages using Apt
 RUN apt-get -qqq update && \
     apt-get -qqq install -y python3 python3-pip && \
+	apt-get clean && \
     pip3 install --upgrade pip setuptools wheel --quiet --root-user-action=ignore
 
 # Copy necessary files to /app directory
