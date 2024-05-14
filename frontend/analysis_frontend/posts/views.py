@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.contrib.auth import login, authenticate
 from django.shortcuts import render, redirect
+from django.views.decorators.http import require_http_methods
 
 from . import database
 
-@require_GET
+@require_http_methods(["GET"])
 def post_detail(request):
     results = database.deb_get_post_analysis_comments('RealDictCursor')
     data = {}
@@ -14,7 +15,7 @@ def post_detail(request):
       data = {'post': 'No Data'}
     return render(request, 'posts/post_detail.html', {'data': data})
 
-@require_GET
+@require_http_methods(["GET"])
 def row_counts(request):
     """Get row counts
     """

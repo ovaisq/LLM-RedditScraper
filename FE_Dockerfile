@@ -37,6 +37,8 @@ ARG user
 ENV user $user
 ARG password
 ENV password $password
+ARG DJANGO_SECRET_KEY
+ENV DJANGO_SECRET_KEY $DJANGO_SECRET_KEY
 
 # Run ROllama FE Run!
 CMD ["/app/fe_run.sh"]
