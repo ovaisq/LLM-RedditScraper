@@ -169,7 +169,7 @@ def db_get_comment_ids():
 
     return comment_id_list
 
-def deb_get_post_analysis_comments(cursorfactory=None):
+def deb_get_post_analysis_comments():
     """Retrieve a random post body and any or all GPT responses related to the post,
         for a specific post_id. Returns a dictionary. Text is
         rendered to html for the convenience of UI rendering.
@@ -211,7 +211,7 @@ def deb_get_post_analysis_comments(cursorfactory=None):
                     p.subreddit, pc.comment_bodies;
                 """
 
-    conn, cur = psql_connection(cursorfactory=cursorfactory)
+    conn, cur = psql_connection(cursorfactory=RealDictCursor)
 
     cur.execute(sql_query)
     result = cur.fetchone()

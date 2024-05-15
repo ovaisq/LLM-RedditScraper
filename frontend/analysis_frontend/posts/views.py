@@ -7,7 +7,7 @@ from . import database
 
 @require_http_methods(["GET"])
 def post_detail(request):
-    results = database.deb_get_post_analysis_comments('RealDictCursor')
+    results = database.deb_get_post_analysis_comments()
     data = {}
     if results:
       data = results
