@@ -349,7 +349,10 @@ def get_post_comments(post_obj):
 
     logging.info('Getting comments for post %s', post_obj.id)
 
-    for comment in post_obj.comments:
+    post_obj.comments.replace_more(limit=None)
+    all_comments = post_obj.comments.list()
+
+    for comment in all_comments:
         comment_data = get_comment_details(comment)
         insert_data_into_table('comments', comment_data)
 
