@@ -6,7 +6,6 @@
 import ast
 import json
 import logging
-import markdown
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -181,36 +180,3 @@ def db_get_comment_ids():
         comment_id_list.append(a_comment_id[0])
 
     return comment_id_list
-
-def db_get_post_n_analyzed_docs(post_id):
-    """Retrieve the post body and any or all GPT responses related to the post,
-        for a specific post_id. Returns a dictionary. Text is
-        rendered to html for the convenience of UI rendering.
-    """
-
-    sql_query = f"""
-                    SELECT
-                        MAX(p.post_body)as post ,
-                        array_to_string(array_agg(ad.analysis_document),
-                        ', ') as analysis_docs
-                    from
-                        public.posts p
-                    join public.analysis_documents ad on
-                        p.post_id = (ad.analysis_document->>'reference_id')::varchar
-                    where
-                        p.post_id = '{post_id}';
-                """
-    conn, cur = psql_connection(RealDictCursor)
-
-    try:
-        cur.execute(sql_query)
-        result = cur.fetchone()
-        conn.close()
-    except psycopg2.Error as e:
-        logging.error("Error connecting to PostgreSQL: %s", e)
-        raise
-
-    return {
-            'post': markdown.markdown(result['post']),
-            'analysis_docs': [dict({**row, 'analysis': markdown.markdown(row['analysis'])}) for row in ast.literal_eval(result['analysis_docs'])]
-           }

@@ -52,8 +52,8 @@ load_config_file "${BUILD_INFO}"
 
 echo "Install Pkg"
 # user and group name is same as service name
-GROUP=${SERVICE}
-USER=${SERVICE}
+GROUP=$(echo "${SERVICE}" | cut -d'-' -f1)
+USER=$GROUP
 
 check_and_create_group "${GROUP}"
 check_and_create_user "${USER}" "${GROUP}"
