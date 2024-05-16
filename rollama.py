@@ -44,13 +44,11 @@
         - Add long running task queue
             - Queue: task_id, task_status, end_point
             - Kafka
-        - Revisit Endpoint logic add robust error handling
-        - Add scheduler app - to schedule some of these events
-            - scheduler checks whether or not a similar tasks exists
         - Add logic to handle list of lists with NUM_ELEMENTS_CHUNK elementsimport configparser
 """
 
 import asyncio
+import hashlib
 import json
 import logging
 import os
@@ -73,6 +71,7 @@ from database import db_get_comment_ids
 from gptutils import prompt_chat
 from reddit_api import create_reddit_instance
 from utils import unix_ts_str, sleep_to_avoid_429, get_vals_list_of_dicts
+from redditutils import build_parent_child_tree
 
 app = Flask('ROllama-GPT')
 
@@ -349,12 +348,40 @@ def get_post_comments(post_obj):
 
     logging.info('Getting comments for post %s', post_obj.id)
 
-    post_obj.comments.replace_more(limit=None)
-    all_comments = post_obj.comments.list()
+    submission = REDDIT.submission(post_obj.id)
+    submission.comments.replace_more(limit=None)
+    try:
+        all_comments = submission.comments.list()
+    except AttributeError as e:
+        logging.warning('%s has no comments', post_obj.id)
+        pass
+
+    # Create a dictionary to store parent-child relationships
+    comment_dict = {c.id: c for c in all_comments}
+    parent_child_tree = {}
 
     for comment in all_comments:
         comment_data = get_comment_details(comment)
         insert_data_into_table('comments', comment_data)
+        parent_comment_id = comment.parent_id.split('_')[1]
+        if parent_comment_id in comment_dict:
+            parent_comment = comment_dict[parent_comment_id]
+
+            # If the parent-comment relationship doesn't already exist in the tree,
+            # add it as a child node of the parent comment.
+            if comment.id not in parent_child_tree.get(parent_comment.id, []):
+                parent_child_tree.setdefault(parent_comment.id, []).append(comment.id)
+
+    dt = unix_ts_str()
+    shasum256 = hashlib.sha256(str(parent_child_tree).encode()).hexdigest()
+    parent_child_tree_data = {
+                              'timestamp' : dt, #string
+                              'shasum256' : shasum256, #string
+                              'post_id' : post_obj.id, #string
+                              'parent_child_tree' : json.dumps(parent_child_tree) #json
+                             }
+
+    insert_data_into_table('parent_child_tree_data', parent_child_tree_data)
 
 def get_post_details(post):
     """Get details for a submission post

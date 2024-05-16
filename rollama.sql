@@ -74,6 +74,14 @@ CREATE TABLE IF NOT EXISTS analysis_documents (
     analysis_document JSONB NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS parent_child_tree_data (
+    id SERIAL PRIMARY KEY,
+    timestamp VARCHAR(255),
+    shasum256 VARCHAR(255) UNIQUE,
+    post_id VARCHAR(255),
+    parent_child_tree JSONB
+);
+
 --Create Indexes
 --Analysis Documents
 CREATE INDEX IF NOT EXISTS timestamp_index ON analysis_documents (timestamp);
@@ -113,5 +121,11 @@ CREATE INDEX IF NOT EXISTS subscription_subreddit_idx ON public."subscription" (
 CREATE INDEX idx_posts_post_id ON public.posts (post_id);
 CREATE INDEX idx_analysis_documents_reference_id ON public.analysis_documents (
 	(analysis_document->>'reference_id')
-); 
+);
+--parent_child_tree_data
+CREATE INDEX idx_post_id ON parent_child_tree_data (post_id);
+CREATE INDEX idx_parent_child_tree ON parent_child_tree_data (parent_child_tree);
 
+--permissions
+GRANT ALL PRIVILEGES ON parent_child_tree_data TO rollama;
+GRANT ALL PRIVILEGES ON parent_child_tree_data_id_seq TO rollama;
