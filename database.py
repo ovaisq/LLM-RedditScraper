@@ -136,21 +136,21 @@ def db_get_post_ids():
     post_id_list = []
 
     sql_query = """
-				SELECT post_id
-				FROM posts
-				WHERE post_body NOT IN ('', '[removed]', '[deleted]')
-				AND NOT EXISTS (
-					SELECT 1
-					FROM analysis_documents
-					WHERE analysis_document ->> 'post_id' = posts.post_id
-						AND analysis_document ->> 'post_id' IS NOT NULL
-				)
-				AND NOT EXISTS (
-					SELECT 1
-					FROM analysis_documents
-					WHERE analysis_document ->> 'reference_id' = posts.post_id
-						AND analysis_document ->> 'reference_id' IS NOT NULL
-				);
+                SELECT post_id
+                FROM posts
+                WHERE post_body NOT IN ('', '[removed]', '[deleted]')
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM analysis_documents
+                    WHERE analysis_document ->> 'post_id' = posts.post_id
+                        AND analysis_document ->> 'post_id' IS NOT NULL
+                )
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM analysis_documents
+                    WHERE analysis_document ->> 'reference_id' = posts.post_id
+                        AND analysis_document ->> 'reference_id' IS NOT NULL
+                );
                 """
 
     post_ids = get_select_query_results(sql_query)
@@ -169,19 +169,19 @@ def db_get_comment_ids():
 
     comment_id_list = []
 
-	sql_query = """
-				SELECT comment_id
-				FROM comments
-				WHERE md5(comment_body) NOT IN (md5(''), md5('[removed]'), md5('[deleted]'))
-				AND NOT EXISTS (
-					SELECT 1
-					FROM analysis_documents
-					WHERE (analysis_document ->> 'comment_id' = comments.comment_id
-							OR analysis_document ->> 'reference_id' = comments.comment_id)
-						AND (analysis_document ->> 'comment_id' IS NOT NULL
-							OR analysis_document ->> 'reference_id' IS NOT NULL)
-				);
-				"""
+    sql_query = """
+                SELECT comment_id
+                FROM comments
+                WHERE md5(comment_body) NOT IN (md5(''), md5('[removed]'), md5('[deleted]'))
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM analysis_documents
+                    WHERE (analysis_document ->> 'comment_id' = comments.comment_id
+                            OR analysis_document ->> 'reference_id' = comments.comment_id)
+                        AND (analysis_document ->> 'comment_id' IS NOT NULL
+                            OR analysis_document ->> 'reference_id' IS NOT NULL)
+                );
+                """
 
     comment_ids = get_select_query_results(sql_query)
     if not comment_ids:
