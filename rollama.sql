@@ -96,6 +96,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS authors_pkey ON public.authors USING btree (
 --Comment
 CREATE UNIQUE INDEX IF NOT EXISTS comment_pkey ON public.comments USING btree (
     comment_id
+CREATE INDEX idx_comments_comment_body_md5 ON comments(md5(comment_body));
+CREATE INDEX idx_comments_comment_id ON comments(comment_id);
+CREATE INDEX idx_analysis_documents_comment_id ON analysis_documents((analysis_document->>'comment_id'));
 );
 CREATE INDEX IF NOT EXISTS comment_post_id_idx ON public.comments USING btree (
     post_id, subreddit
