@@ -351,9 +351,8 @@ def get_post_comments(post_obj):
     submission.comments.replace_more(limit=None)
     try:
         all_comments = submission.comments.list()
-    except AttributeError as e:
+    except AttributeError:
         logging.warning('%s has no comments', post_obj.id)
-        pass
 
     # Create a dictionary to store parent-child relationships
     comment_dict = {c.id: c for c in all_comments}
