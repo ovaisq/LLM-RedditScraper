@@ -1,5 +1,8 @@
 *.pem
 *.key
+*.p12
+*.crt
+*.zip
 *.gz
 *.tar
 __pycache__
