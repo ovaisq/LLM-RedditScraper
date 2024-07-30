@@ -413,7 +413,7 @@ def get_comment_details(comment):
     comment_submitter = comment.is_submitter if hasattr(comment, 'is_submitter') else None
     comment_edited = str(int(comment.edited)) if comment.edited else False
 
-    if comment_author:
+    if comment_author != 'AutoModerator':
         process_author(comment_author)
 
     comment_data = {
