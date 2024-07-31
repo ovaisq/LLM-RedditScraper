@@ -70,7 +70,7 @@ BEGIN
     WITH tbl AS (
         SELECT table_schema, table_name
         FROM information_schema.tables
-        WHERE table_name NOT LIKE 'pg_%' AND table_schema IN ('public')
+        WHERE table_name NOT LIKE 'pg_%' AND table_name <> 'row_count_history' AND table_schema IN ('public')
     )
     INSERT INTO row_count_history (table_name, row_count)
     SELECT
@@ -156,7 +156,8 @@ ALTER TABLE public.comments OWNER TO rollama;
 CREATE TABLE public.errors (
     item_id character varying,
     item_type character varying,
-    error text
+    error text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 
