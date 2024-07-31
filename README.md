@@ -449,7 +449,38 @@ flowchart TD
     Q --> O
     P -- No --> R[End]
 ```
+#### pg_cron settings for scheduling function triggers
+**See rollama.sql for PGSQL functions and pg_cron installation**
 
+**Schedule pg_cron jobs**
+```shell
+rollama=> SELECT cron.schedule('*/5 * * * *', 'select schedule_update()');
+SELECT cron.schedule('*/10 * * * *', $$delete from comments where comment_author = 'AutoModerator'$$);
+SELECT cron.schedule('*/10 * * * *', $$delete from posts where post_author = 'AutoModerator'$$);
+```
+
+**Confirm that pg_cron jobs are loaded**
+```shell
+rrollama=> select * from cron.job;
+ jobid |   schedule   |                           command                           | nodename  | nodeport | database | username | active | jobname
+-------+--------------+-------------------------------------------------------------+-----------+----------+----------+----------+--------+---------
+    16 | */5 * * * *  | select schedule_update()                                    | localhost |     5432 | rollama  | rollama  | t      |
+    24 | */10 * * * * | delete from posts where post_author = 'AutoModerator'       | localhost |     5432 | rollama  | rollama  | t      |
+    25 | */10 * * * * | delete from comments where comment_author = 'AutoModerator' | localhost |     5432 | rollama  | rollama  | t      |
+```
+**unschedule pg_cron jobs**
+```shell
+rollama=> SELECT cron.unschedule(<jobid from cron.jobs table>);
+```
+**Confirm pg_cron job runs**
+```shell
+rollama=> select * from cron.job_run_details order by runid desc limit 5;
+ jobid | runid | job_pid | database | username |                                                        command                                                         |  status   |                return_message                |          start_time           |           end_time
+-------+-------+---------+----------+----------+------------------------------------------------------------------------------------------------------------------------+-----------+----------------------------------------------+-------------------------------+-------------------------------
+    25 |   948 |  286605 | rollama  | rollama  | delete from comments where comment_author = 'AutoModerator'                                                            | succeeded | DELETE 2                                     | 2024-07-31 13:00:00.004014-07 | 2024-07-31 13:00:00.191934-07
+    16 |   947 |  286604 | rollama  | rollama  | select schedule_update()                                                                                               | succeeded | SELECT 1                                     | 2024-07-31 13:00:00.002889-07 | 2024-07-31 13:00:00.338836-07
+    24 |   946 |  286603 | rollama  | rollama  | delete from posts where post_author = 'AutoModerator'                                                                  | succeeded | DELETE 0                                     | 2024-07-31 13:00:00.002287-07 | 2024-07-31 13:00:00.005317-07
+```
 #### Database Schema
 ![Database Schema](database.png)
 
