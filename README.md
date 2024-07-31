@@ -483,15 +483,3 @@ rollama=> select * from cron.job_run_details order by runid desc limit 5;
 ```
 #### Database Schema
 ![Database Schema](database.png)
-
-#### llama-gpt VM config 
-
-*nVidia GTX-1070i 8GB in Passthrough Mode*
-
-![llama-gpt-vm](llama-gpt-vm.png)
-
-#### Reddit Data Scraper Service VM config
-![service-vm](reddit-data-scrapper-vm.png)
-
-#### PostgreSQL VM config
-![postgresql-vm](postgresql-vm.png)
