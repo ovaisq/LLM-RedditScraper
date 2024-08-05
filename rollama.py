@@ -71,8 +71,9 @@ from database import db_get_comment_ids
 from gptutils import prompt_chat
 from reddit_api import create_reddit_instance
 from utils import unix_ts_str, sleep_to_avoid_429, get_vals_list_of_dicts
+from websearch import store_websearch_results
 
-app = Flask('ROllama-GPT')
+app = Flask('RedditScraper')
 
 # constants - set environment vars
 get_config()
