@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ©2024, Ovais Quraishi
 
 import unittest
 import json
