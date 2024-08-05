@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ©2024, Ovais Quraishi
 """Ollama-GPT module
 """
 
@@ -28,18 +29,18 @@ async def prompt_chat(llm,
     logging.info('Running for %s', llm)
     try:
         response = await client.chat(
-                                        model=llm,
-                                        stream=False,
-                                        messages=[
-                                                  {
-                                                   'role': 'user',
-                                                   'content': content,
-                                                   'keep_alive' : 0
-                                                  },
-                                                 ],
-                                        options = {
-                                                    'temperature' : 0
-                                                  }
+                                     model=llm,
+                                     stream=False,
+                                     messages=[
+                                               {
+                                                'role': 'user',
+                                                'content': content,
+                                                'keep_alive' : 0
+                                               },
+                                              ],
+                                     options = {
+                                                'temperature' : 0
+                                               }
                                     )
 
         # chatgpt analysis
