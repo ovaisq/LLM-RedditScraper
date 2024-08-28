@@ -142,10 +142,6 @@ def analyze_posts():
 
     logging.info('All posts analyzed')
 
-    #for a_post_id in post_ids:
-    #    logging.info('Analyzing Post ID %s', a_post_id)
-    #    analyze_post(a_post_id)
-
 def analyze_post(post_id):
     """Analyze text from Reddit Post
     """
@@ -241,9 +237,6 @@ def analyze_comments():
         results = [future.result() for future in futures]  # if you need the result of each analysis
 
     logging.info('All commentss analyzed')
-    #for a_comment_id in comment_ids:
-    #    logging.info('Analyzing Comment ID %s', a_comment_id)
-    #    analyze_comment(a_comment_id)
 
 def analyze_comment(comment_id):
     """Analyze text
