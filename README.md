@@ -71,31 +71,29 @@ flowchart TD
 ```
 #### Environment Configuration
 ```mermaid
-%%{init: {'theme': 'forest'}}%%
+%%{init: {'theme': 'base','themeVariables': {'lineColor': 'Blue', 'primaryColor':'#acbdda','tertiaryColor': '#436092'}}}%%
 graph TD;
-    style R fill:#a7e0f2,stroke:#13821a,stroke-width:4px
+  style R fill:#a7e0f2,stroke:#13821a,stroke-width:2px
   subgraph ROllama[ ]
-  R(("`**ROllama
-    &nbsp&nbsp&nbsp&nbspService&nbspAPI**`"&nbsp&nbsp&nbsp
-    Debian 12 VM or Docker
-    &nbsp&nbsp&nbsp4 vCPU, 2GB RAM&nbsp&nbsp&nbsp ))
+  R(("`**Reddit Scraper
+    API**`"
+    Dockerized ))
   end
-  subgraph Load_Balancer["Load Balancer"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp]
+  subgraph Load_Balancer["Load Balancer"]
     Nginx[haproxy]
   end
 
-  subgraph Nodes["Nodes"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp]
-    Node1[MacOS Sonoma 14.4
+  subgraph Nodes["Nodes"]
+    Node1[MacOS Sequoia 15.1 beta
     MacBook Pro M1 Max
     32GB RAM]
-    Node2[Debian 12
-    16 Cores
-    48GB RAM
-    nVidia GTX RTX3060 12GB VRAM]
-    Node3[Debian 12
-    16 vCPU
-    32GB RAM
-    nVidia RTX 3060 12GB VRAM]
+    Node2["ESXi VM (Debian 12)
+    2 x nVidia GTX RTX3060
+    12GB VRAM ea."]
+    Node3[Debian 12 PC
+    2 x NVIDIA RTX 4060 Ti
+    16GB VRAM ea.
+    ]
   end
 
   Nginx -- RR --> Node1
