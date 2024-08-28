@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # ©2024, Ovais Quraishi
 
+import os
 import unittest
 import json
 from unittest.mock import patch, MagicMock
@@ -10,7 +11,7 @@ get_config()
 SRVC_SHARED_SECRET=os.environ['SRVC_SHARED_SECRET']
 
 # Import the Flask app
-from zollama import app
+from rollama import app
 
 class TestFlaskApp(unittest.TestCase):
 

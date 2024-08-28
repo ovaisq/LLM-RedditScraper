@@ -15,4 +15,5 @@ setup.config.template
 srvc_run_config.env
 utils.py
 ver.txt
+websearch.py
 docker_run_srvc.sh

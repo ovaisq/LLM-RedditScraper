@@ -58,6 +58,7 @@ from langdetect import detect
 from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
 from prawcore import exceptions
+from concurrent.futures import ProcessPoolExecutor
 
 # Import required local modules
 from config import get_config
@@ -80,6 +81,7 @@ get_config()
 
 NUM_ELEMENTS_CHUNK = 25
 LLMS = os.environ['LLMS'].split(',')
+PROC_WORKERS = int(os.environ['PROC_WORKERS'])
 
 # Flask app config
 app.config.update(
@@ -134,9 +136,15 @@ def analyze_posts():
     if not post_ids:
         return
 
-    for a_post_id in post_ids:
-        logging.info('Analyzing Post ID %s', a_post_id)
-        analyze_post(a_post_id)
+    with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
+        futures = [executor.submit(analyze_post, a_post_id) for a_post_id in post_ids]
+        results = [future.result() for future in futures]  # if you need the result of each analysis
+
+    logging.info('All posts analyzed')
+
+    #for a_post_id in post_ids:
+    #    logging.info('Analyzing Post ID %s', a_post_id)
+    #    analyze_post(a_post_id)
 
 def analyze_post(post_id):
     """Analyze text from Reddit Post
@@ -175,7 +183,7 @@ def analyze_post(post_id):
             logging.warning('Skipping %s - langage detected %s', post_id, language)
             return
     except langdetect.lang_detect_exception.LangDetectException as e:
-        logging.warning('Skipping %s - langage detected UNKNOWN %s', post_id, e)
+        logging.warning('Skipping %s - language detected UNKNOWN %s', post_id, e)
     prompt = 'respond to this post title and post body: '
 
     for llm in LLMS:
@@ -184,7 +192,7 @@ def analyze_post(post_id):
         # jsonb document
         #  schema_version key added starting v2
         analysis_document = {
-                            'schema_version' : '3',
+                            'schema_version' : '4',
                             'source' : 'reddit',
                             'category' : 'post',
                             'reference_id' : post_id,
@@ -194,7 +202,8 @@ def analyze_post(post_id):
         analysis_data = {
                         'timestamp': analyzed_obj['timestamp'],
                         'shasum_512' : analyzed_obj['shasum_512'],
-                        'analysis_document' : json.dumps(analysis_document)
+                        'analysis_document' : json.dumps(analysis_document),
+                        'ollama_ver' : analyzed_obj['ollama_ver']
                         }
         insert_data_into_table('analysis_documents', analysis_data)
 
@@ -227,8 +236,14 @@ def analyze_comments():
         logging.warning('No comments to analyze')
         return
 
-    for a_comment_id in comment_ids:
-        analyze_comment(a_comment_id)
+    with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
+        futures = [executor.submit(analyze_comment, a_comment_id) for a_comment_id in comment_ids]
+        results = [future.result() for future in futures]  # if you need the result of each analysis
+
+    logging.info('All commentss analyzed')
+    #for a_comment_id in comment_ids:
+    #    logging.info('Analyzing Comment ID %s', a_comment_id)
+    #    analyze_comment(a_comment_id)
 
 def analyze_comment(comment_id):
     """Analyze text
@@ -275,7 +290,7 @@ def analyze_comment(comment_id):
         # jsonb document
         #  schema_version key added starting v2
         analysis_document = {
-                            'schema_version' : '3',
+                            'schema_version' : '4',
                             'source' : 'reddit',
                             'category' : 'comment',
                             'reference_id' : comment_id,
@@ -285,7 +300,8 @@ def analyze_comment(comment_id):
         analysis_data = {
                         'timestamp': analyzed_obj['timestamp'],
                         'shasum_512' : analyzed_obj['shasum_512'],
-                        'analysis_document' : json.dumps(analysis_document)
+                        'analysis_document' : json.dumps(analysis_document),
+                        'ollama_ver' : analyzed_obj['ollama_ver']
                         }
         insert_data_into_table('analysis_documents', analysis_data)
 

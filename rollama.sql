@@ -98,7 +98,10 @@ CREATE TABLE public.analysis_documents (
     id integer NOT NULL,
     "timestamp" timestamp with time zone NOT NULL,
     shasum_512 text NOT NULL,
-    analysis_document jsonb NOT NULL
+	ollama_ver varchar NULL,
+    analysis_document jsonb NOT NULL,
+	CONSTRAINT analysis_documents_pkey PRIMARY KEY (id),
+	CONSTRAINT analysis_documents_shasum_512_key UNIQUE (shasum_512)
 );
 
 
