@@ -12,11 +12,8 @@ flowchart TD
 
     classDef subgraph_padding fill:none,stroke:none
     Rr[Redditor]
-    RR(("`&nbsp&nbsp
-&nbsp&nbsp&nbsp**ROllama&nbsp&nbsp&nbsp&nbsp
-    &nbsp&nbsp&nbspService&nbsp&nbsp
-    API&nbsp&nbsp**
-    `"))
+    RR(("Reddit Scraper
+    API Service"))
 
 
     Rr ==> Reddit ===> RR ===> ORD
@@ -31,7 +28,7 @@ flowchart TD
         end
     end
 
-    subgraph LocalEnv["`**Local&nbspEnvironment**`"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp]
+    subgraph LocalEnv["`**Local&nbspEnvironment**`"]
         subgraph blank[ ]
             direction TB
             PSQL[("`**PostgreSQL**`")]
@@ -45,9 +42,9 @@ flowchart TD
             end
             subgraph OLLAMA
                 subgraph blank4[ ]
-                    LLM1[deepseek-llm]
-                    LLM2[llama3]
-                    LLM3[gemma]
+                    LLM1[internlm2]
+                    LLM2[llama3.1]
+                    LLM3[gemma2]
                 end
             end
             subgraph PRD["Processed Reddit Data"]

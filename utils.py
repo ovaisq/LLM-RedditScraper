@@ -105,3 +105,27 @@ def get_vals_list_of_dicts(dict_key, list_of_dicts):
     vals = [x[dict_key] for x in list_of_dicts]
 
     return vals
+
+def get_model_from_list(dicts, name):
+    """Retrieve a model from a list of dictionaries based on the provided name.
+    """
+
+    # Check if name contains a ':latest' suffix
+    if ":" in name:
+        actual_name = name
+    else:
+        actual_name = name+':latest'
+
+    # Find the matching dictionary
+    for model in dicts:
+        if model['name'] == actual_name:
+            return model
+
+    # If no match found, return None
+    return None
+
+def calculate_prompt_completion_time(start_time, end_time):
+    """Number of seconds between start and end
+    """
+
+    return int(end_time - start_time)
