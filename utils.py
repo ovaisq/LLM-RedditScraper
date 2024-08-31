@@ -4,11 +4,15 @@
 """
 
 import datetime
+import json
 import logging
+import os
+import requests
 import time
 import random
 import string
 from datetime import datetime as DT
+from database import insert_data_into_table
 
 
 # substrings to be rplaced
@@ -106,22 +110,23 @@ def get_vals_list_of_dicts(dict_key, list_of_dicts):
 
     return vals
 
-def get_model_from_list(dicts, name):
+def get_model_from_list(name):
     """Retrieve a model from a list of dictionaries based on the provided name.
     """
 
-    # Check if name contains a ':latest' suffix
+    # check if name contains a ':latest' suffix
     if ":" in name:
         actual_name = name
     else:
         actual_name = name+':latest'
 
-    # Find the matching dictionary
+    dicts = get_model_info(name)
+    # find the matching dictionary
     for model in dicts:
         if model['name'] == actual_name:
             return model
 
-    # If no match found, return None
+    # if no match found, return None
     return None
 
 def calculate_prompt_completion_time(start_time, end_time):
@@ -129,3 +134,62 @@ def calculate_prompt_completion_time(start_time, end_time):
     """
 
     return int(end_time - start_time)
+
+def get_semver():
+    """Hit the API endpoint for semantic version.
+    """
+
+    host = os.environ['OLLAMA_API_URL']
+    url = f"{host}/api/version"
+
+    response = requests.get(url)
+
+    # check if the GET request was successful
+    if response.status_code == 200:
+        # extract semantic version from JSON
+        semver = response.json()['version']
+
+        return semver
+
+    else:
+        logging.error('Failed to get SemVer. Status code: %s', {response.status_code})
+        return False
+
+def get_model_info(llm):
+    """Retrieve model information from a specified API endpoint.
+    """
+    
+    host = os.environ['OLLAMA_API_URL']
+    url = f"{host}/api/ps" # API URL for getting models
+
+    response = requests.get(url)
+    
+    response.raise_for_status()
+    
+    models = response.json()['models']
+    
+    return models
+
+def store_model_perf_info(llm, analyzed_obj, prompt_completion_time):
+    """Store model performance information into a database table.
+    """
+    
+    try:
+        model_info_obj = get_model_from_list(llm)
+        prompt_completion_info_obj = {
+                                       'doc_shasum_512' : analyzed_obj['shasum_512'],
+                                       'ollama_host' : '',
+                                       'ollama_ver'  : analyzed_obj['ollama_ver'],
+                                       'name' : model_info_obj['name'],
+                                       'model' : model_info_obj['model'],
+                                       'size' : model_info_obj['size'],
+                                       'digest' : analyzed_obj['shasum_512'],
+                                       'details' : json.dumps(model_info_obj['details']),
+                                       'expires_at' : model_info_obj['expires_at'],
+                                       'size_vram' : model_info_obj['size_vram'],
+                                       'prompt_completion_time' : prompt_completion_time
+                                     }
+        insert_data_into_table('prompt_completion_details', prompt_completion_info_obj)
+    except Exception as e:
+        logging.error(e)
+        return None

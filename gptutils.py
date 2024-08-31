@@ -4,10 +4,8 @@
 """
 
 import hashlib
-import json
 import logging
 import os
-import requests
 import httpx
 
 from ollama import AsyncClient
@@ -16,6 +14,7 @@ from config import get_config
 from encryption import encrypt_text
 from utils import ts_int_to_dt_obj
 from utils import sanitize_string
+from utils import get_semver
 
 get_config()
 
@@ -72,25 +71,3 @@ async def prompt_chat(llm,
     except (httpx.ReadError, httpx.ConnectError) as e:
         logging.error('%s',e.args[0])
         raise httpx.ConnectError('Unable to reach Ollama Server') from None
-
-def get_semver():
-    """Hit the API endpoint for semantic version.
-    """
-
-    host = os.environ['OLLAMA_API_URL']
-    url = f"{host}/api/version"
-
-    response = requests.get(url)
-
-    # check if the GET request was successful
-    if response.status_code == 200:
-        data = json.loads(response.text)
-
-        # extract semantic version from JSON
-        semver = data['version']
-
-        return semver
-
-    else:
-        logging.error('Failed to get SemVer. Status code: %s', {response.status_code})
-        return False

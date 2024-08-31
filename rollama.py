@@ -52,6 +52,7 @@ import hashlib
 import json
 import logging
 import os
+import time
 
 import langdetect
 from langdetect import detect
@@ -72,6 +73,7 @@ from database import db_get_comment_ids
 from gptutils import prompt_chat
 from reddit_api import create_reddit_instance
 from utils import unix_ts_str, sleep_to_avoid_429, get_vals_list_of_dicts
+from utils import calculate_prompt_completion_time, store_model_perf_info
 from websearch import store_websearch_results
 
 app = Flask('RedditScraper')
@@ -183,7 +185,10 @@ def analyze_post(post_id):
     prompt = 'respond to this post title and post body: '
 
     for llm in LLMS:
+        start_time = time.time()
         analyzed_obj, _ = asyncio.run(prompt_chat(llm, prompt + text, False))
+        end_time = time.time()
+        prompt_completion_time = calculate_prompt_completion_time(start_time, end_time)
 
         # jsonb document
         #  schema_version key added starting v2
@@ -202,6 +207,7 @@ def analyze_post(post_id):
                         'ollama_ver' : analyzed_obj['ollama_ver']
                         }
         insert_data_into_table('analysis_documents', analysis_data)
+        store_model_perf_info(llm, analyzed_obj, prompt_completion_time)
 
 @app.route('/analyze_comment', methods=['GET'])
 @jwt_required()
@@ -236,7 +242,7 @@ def analyze_comments():
         futures = [executor.submit(analyze_comment, a_comment_id) for a_comment_id in comment_ids]
         results = [future.result() for future in futures]  # if you need the result of each analysis
 
-    logging.info('All commentss analyzed')
+    logging.info('All comments analyzed')
 
 def analyze_comment(comment_id):
     """Analyze text
@@ -278,7 +284,10 @@ def analyze_comment(comment_id):
     prompt = 'respond to this comment: '
 
     for llm in LLMS:
+        start_time = time.time()
         analyzed_obj, _ = asyncio.run(prompt_chat(llm, prompt + text, False))
+        end_time = time.time()
+        prompt_completion_time = calculate_prompt_completion_time(start_time, end_time)
 
         # jsonb document
         #  schema_version key added starting v2
@@ -291,12 +300,15 @@ def analyze_comment(comment_id):
                             'analysis' : analyzed_obj['analysis']
                             }
         analysis_data = {
-                        'timestamp': analyzed_obj['timestamp'],
-                        'shasum_512' : analyzed_obj['shasum_512'],
-                        'analysis_document' : json.dumps(analysis_document),
-                        'ollama_ver' : analyzed_obj['ollama_ver']
+                         'timestamp': analyzed_obj['timestamp'],
+                         'shasum_512' : analyzed_obj['shasum_512'],
+                         'analysis_document' : json.dumps(analysis_document),
+                         'ollama_ver' : analyzed_obj['ollama_ver']
                         }
+
         insert_data_into_table('analysis_documents', analysis_data)
+        store_model_perf_info(llm, analyzed_obj, prompt_completion_time)
+
 
 @app.route('/get_sub_post', methods=['GET'])
 @jwt_required()
