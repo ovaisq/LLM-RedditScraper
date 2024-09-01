@@ -3,8 +3,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 15.7 (Debian 15.7-1.pgdg120+1)
--- Dumped by pg_dump version 15.7 (Debian 15.7-1.pgdg120+1)
+-- Dumped from database version 15.8 (Debian 15.8-1.pgdg120+1)
+-- Dumped by pg_dump version 15.8 (Debian 15.8-1.pgdg120+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -98,10 +98,8 @@ CREATE TABLE public.analysis_documents (
     id integer NOT NULL,
     "timestamp" timestamp with time zone NOT NULL,
     shasum_512 text NOT NULL,
-	ollama_ver varchar NULL,
     analysis_document jsonb NOT NULL,
-	CONSTRAINT analysis_documents_pkey PRIMARY KEY (id),
-	CONSTRAINT analysis_documents_shasum_512_key UNIQUE (shasum_512)
+    ollama_ver character varying
 );
 
 
@@ -146,7 +144,9 @@ CREATE TABLE public.comments (
     comment_created_utc integer,
     comment_body text,
     post_id character varying,
-    subreddit text
+    subreddit text,
+    comment_upvote_count integer,
+    comment_downvote_count integer
 );
 
 
@@ -225,6 +225,51 @@ CREATE TABLE public.posts (
 ALTER TABLE public.posts OWNER TO rollama;
 
 --
+-- Name: prompt_completion_details; Type: TABLE; Schema: public; Owner: rollama
+--
+
+CREATE TABLE public.prompt_completion_details (
+    id integer NOT NULL,
+    doc_shasum_512 character varying NOT NULL,
+    ollama_host character varying,
+    ollama_ver character varying NOT NULL,
+    name character varying(255) NOT NULL,
+    model character varying(255) NOT NULL,
+    size bigint NOT NULL,
+    digest character varying(255) NOT NULL,
+    details jsonb NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    size_vram bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    prompt_completion_time integer NOT NULL
+);
+
+
+ALTER TABLE public.prompt_completion_details OWNER TO rollama;
+
+--
+-- Name: prompt_completion_details_id_seq; Type: SEQUENCE; Schema: public; Owner: rollama
+--
+
+CREATE SEQUENCE public.prompt_completion_details_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.prompt_completion_details_id_seq OWNER TO rollama;
+
+--
+-- Name: prompt_completion_details_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: rollama
+--
+
+ALTER SEQUENCE public.prompt_completion_details_id_seq OWNED BY public.prompt_completion_details.id;
+
+
+--
 -- Name: row_count_history; Type: TABLE; Schema: public; Owner: rollama
 --
 
@@ -287,6 +332,44 @@ CREATE TABLE public.subscription (
 ALTER TABLE public.subscription OWNER TO rollama;
 
 --
+-- Name: websearch_results_ts; Type: TABLE; Schema: public; Owner: rollama
+--
+
+CREATE TABLE public.websearch_results_ts (
+    ts timestamp with time zone DEFAULT now() NOT NULL,
+    id integer NOT NULL,
+    source text,
+    post_id text,
+    lookup_text text,
+    websearch_result jsonb NOT NULL
+);
+
+
+ALTER TABLE public.websearch_results_ts OWNER TO rollama;
+
+--
+-- Name: websearch_results_ts_id_seq; Type: SEQUENCE; Schema: public; Owner: rollama
+--
+
+CREATE SEQUENCE public.websearch_results_ts_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.websearch_results_ts_id_seq OWNER TO rollama;
+
+--
+-- Name: websearch_results_ts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: rollama
+--
+
+ALTER SEQUENCE public.websearch_results_ts_id_seq OWNED BY public.websearch_results_ts.id;
+
+
+--
 -- Name: parent_child_tree_data id; Type: DEFAULT; Schema: public; Owner: rollama
 --
 
@@ -294,10 +377,24 @@ ALTER TABLE ONLY public.parent_child_tree_data ALTER COLUMN id SET DEFAULT nextv
 
 
 --
+-- Name: prompt_completion_details id; Type: DEFAULT; Schema: public; Owner: rollama
+--
+
+ALTER TABLE ONLY public.prompt_completion_details ALTER COLUMN id SET DEFAULT nextval('public.prompt_completion_details_id_seq'::regclass);
+
+
+--
 -- Name: row_count_history id; Type: DEFAULT; Schema: public; Owner: rollama
 --
 
 ALTER TABLE ONLY public.row_count_history ALTER COLUMN id SET DEFAULT nextval('public.row_count_history_id_seq'::regclass);
+
+
+--
+-- Name: websearch_results_ts id; Type: DEFAULT; Schema: public; Owner: rollama
+--
+
+ALTER TABLE ONLY public.websearch_results_ts ALTER COLUMN id SET DEFAULT nextval('public.websearch_results_ts_id_seq'::regclass);
 
 
 --
@@ -357,11 +454,27 @@ ALTER TABLE ONLY public.posts
 
 
 --
+-- Name: prompt_completion_details prompt_completion_details_pkey; Type: CONSTRAINT; Schema: public; Owner: rollama
+--
+
+ALTER TABLE ONLY public.prompt_completion_details
+    ADD CONSTRAINT prompt_completion_details_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: row_count_history row_count_history_pkey; Type: CONSTRAINT; Schema: public; Owner: rollama
 --
 
 ALTER TABLE ONLY public.row_count_history
     ADD CONSTRAINT row_count_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: websearch_results_ts websearch_results_ts_pkey; Type: CONSTRAINT; Schema: public; Owner: rollama
+--
+
+ALTER TABLE ONLY public.websearch_results_ts
+    ADD CONSTRAINT websearch_results_ts_pkey PRIMARY KEY (id);
 
 
 --
@@ -477,7 +590,7 @@ CREATE INDEX subscription_subreddit_idx ON public.subscription USING btree (subr
 
 
 --
--- Name: SCHEMA cron; Type: ACL; Schema: -; Owner: rollama
+-- Name: SCHEMA cron; Type: ACL; Schema: -; Owner: postgres
 --
 
 GRANT ALL ON SCHEMA cron TO rollama;
@@ -498,17 +611,17 @@ GRANT ALL ON FUNCTION public.update_row_count() TO rollama;
 
 
 --
--- Name: TABLE job; Type: ACL; Schema: cron; Owner: rollama
+-- Name: TABLE job; Type: ACL; Schema: cron; Owner: postgres
 --
 
-GRANT ALL ON TABLE cron.job TO rollama;
+GRANT SELECT,DELETE,UPDATE ON TABLE cron.job TO rollama;
 
 
 --
--- Name: TABLE job_run_details; Type: ACL; Schema: cron; Owner: rollama
+-- Name: TABLE job_run_details; Type: ACL; Schema: cron; Owner: postgres
 --
 
-GRANT ALL ON TABLE cron.job_run_details TO rollama;
+GRANT SELECT,DELETE,UPDATE ON TABLE cron.job_run_details TO rollama;
 
 
 --
@@ -522,21 +635,21 @@ GRANT ALL ON TABLE public.analysis_documents TO rollama;
 -- Name: TABLE authors; Type: ACL; Schema: public; Owner: rollama
 --
 
-GRANT ALL ON TABLE public.authors TO rollama;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.authors TO rollama;
 
 
 --
 -- Name: TABLE comments; Type: ACL; Schema: public; Owner: rollama
 --
 
-GRANT ALL ON TABLE public.comments TO rollama;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.comments TO rollama;
 
 
 --
 -- Name: TABLE errors; Type: ACL; Schema: public; Owner: rollama
 --
 
-GRANT ALL ON TABLE public.errors TO rollama;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.errors TO rollama;
 
 
 --
@@ -557,7 +670,7 @@ GRANT ALL ON SEQUENCE public.parent_child_tree_data_id_seq TO rollama;
 -- Name: TABLE posts; Type: ACL; Schema: public; Owner: rollama
 --
 
-GRANT ALL ON TABLE public.posts TO rollama;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.posts TO rollama;
 
 
 --
@@ -578,7 +691,21 @@ GRANT ALL ON SEQUENCE public.row_count_history_id_seq TO rollama;
 -- Name: TABLE subscription; Type: ACL; Schema: public; Owner: rollama
 --
 
-GRANT ALL ON TABLE public.subscription TO rollama;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.subscription TO rollama;
+
+
+--
+-- Name: TABLE websearch_results_ts; Type: ACL; Schema: public; Owner: rollama
+--
+
+GRANT ALL ON TABLE public.websearch_results_ts TO rollama;
+
+
+--
+-- Name: SEQUENCE websearch_results_ts_id_seq; Type: ACL; Schema: public; Owner: rollama
+--
+
+GRANT ALL ON SEQUENCE public.websearch_results_ts_id_seq TO rollama;
 
 
 --
