@@ -444,6 +444,8 @@ def get_comment_details(comment):
                     'is_comment_submitter': comment_submitter,
                     'is_comment_edited': comment_edited,
                     'comment_created_utc': int(comment.created_utc),
+                    'comment_upvote_count': comment.ups,
+                    'comment_downvote_count': comment.downs,
                     'comment_body': comment.body,
                     'post_id': comment.submission.id,
                     'subreddit': comment.subreddit.display_name
