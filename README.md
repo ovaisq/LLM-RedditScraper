@@ -1,3 +1,9 @@
+---
+runme:
+  id: 01J6QKN1V2K76KBZTH9SRG036P
+  version: v3
+---
+
 ## ROLLAMA-GPT
 
 ### General Overview
@@ -66,16 +72,16 @@ flowchart TD
     class blank5 subgraph_padding
     class blank6 subgraph_padding
 ```
+
 #### Environment Configuration
-```mermaid
+
+```mermaid {"id":"01J6QKN1V0VMEGDS79WHZVDYY0"}
 %%{init: {'theme': 'base','themeVariables': {'lineColor': 'Blue', 'primaryColor':'#acbdda','tertiaryColor': '#436092'}}}%%
 graph TD;
   style R fill:#a7e0f2,stroke:#13821a,stroke-width:2px
-  subgraph ROllama[ ]
-  R(("`**Reddit Scraper
-    API**`"
-    Dockerized ))
-  end
+
+R(("`**Reddit Scraper API
+    Dockerized**`"))
   subgraph Load_Balancer["Load Balancer"]
     Nginx[haproxy]
   end
@@ -100,7 +106,8 @@ graph TD;
 ```
 
 #### API Overview
-```mermaid
+
+```mermaid {"id":"01J6QKN1V0VMEGDS79WMXG6N4T"}
 %%{init: {'theme': 'base', 'themeVariables': {'lineColor': 'Blue'}}}%%
 graph LR
     sub["/login"] --> sub3
@@ -129,18 +136,21 @@ graph LR
     sub12["GET: Fetch post from Reddit, then Chat prompt a given post_id"]
     sub14["GET: Fetch comment from Reddit, then Chat prompt a given comment_id"]
 ```
-  
+
 **From Reddit**:
+
 * Service collects
-  - submissions
-  - comments for each submission
-  - author of each submission
-  - author of each comment to each submission
-  - and all comments for each author.
-*  Subscribes to subreddit that a submission was posted to
+   - submissions
+   - comments for each submission
+   - author of each submission
+   - author of each comment to each submission
+   - and all comments for each author.
+
+* Subscribes to subreddit that a submission was posted to
 
 ### Build
-```shell
+
+```sh {"id":"01J6QKN1V0VMEGDS79WQNHF77A"}
 > pip3 install -r requirements.txt --quiet
 > ./build.sh
 Creating directory: builds/0.1.65
@@ -167,24 +177,32 @@ SRVC_DIR=/usr/local/rollama/
 ```
 
 * Copy the contents of the builds/x.x.x directory over to the target machine
-```shell
+
+```sh {"id":"01J6QKN1V0VMEGDS79WS01AB00"}
 scp -r builds/0.1.65 <remote host>:/var/tmp/
 ```
-* Update **_setup.config_** with secrets and service keys
-  * Where applicable you can generate strong secrets using **openssl**
-  ```shell
-  > openssl rand -base64 28
-  pjo2OaLXlTHXZj4jtOa+3b4JEUqcmKz7C8IJJg=
-  ```
+
+* Update ___setup.config___ with secrets and service keys
+
+* Where applicable you can generate strong secrets using **openssl**
+
+```sh {"id":"01J6QKN1V0VMEGDS79WVKFYAZV"}
+> openssl rand -base64 28
+pjo2OaLXlTHXZj4jtOa+3b4JEUqcmKz7C8IJJg=
+```
+
 * For example **setup.config**
-```shell
+
+```sh {"id":"01J6QKN1V0VMEGDS79WZ1QPQFF"}
 [service]
 ...
 APP_SECRET_KEY=pjo2OaLXlTHXZj4jtOa+3b4JEUqcmKz7C8IJJg=
 ...
 ```
+
 ### Docker build (tested only on Debian 12 for now)
-```shell
+
+```sh {"id":"01J6QKN1V0VMEGDS79X0HRZZN9"}
 ./build_docker.py
 Building Docker image rollama:0.1.65 from /var/tmp/0.1.65...
 sha256:275958fcd3a7a049cc465fbe556802ba40d8cf9fff58ffd4da0593b85d5dca1a
@@ -194,8 +212,10 @@ Docker image rollama:0.1.65 built successfully!
 **OR**
 
 ### SYSTEMD install on a Debian 12 host
-* For now you have to be logged in as a root user: On the machine run 
-```shell
+
+* For now you have to be logged in as a root user: On the machine run
+
+```sh {"id":"01J6QKN1V18CB6GSWCBRMM9AF7"}
 > ./install_srvc.sh
 
 Install Pkg
@@ -207,12 +227,13 @@ Setting up Service
 Creating directory: /etc/rollama/
 Created symlink /etc/systemd/system/multi-user.target.wants/rollama.service → /etc/systemd/system/rollama.service.
 ```
-* Remember to edit and update **_/etc/rollama/setup.config_**
+
+* Remember to edit and update ___/etc/rollama/setup.config___
 * May want to also create SSL cert/key - copy the cert/key in the
-**_/usr/local/rollama/_** directory
-  
+   ___/usr/local/rollama/___ directory
 * Start Service
-```shell
+
+```sh {"id":"01J6QKN1V18CB6GSWCBVP0SDVY"}
 > systemctl status rollama
 ○ rollama.service - Rollama-GPT
      Loaded: loaded (/etc/systemd/system/rollama.service; enabled; preset: enabled)
@@ -243,32 +264,37 @@ May 02 11:22:48 debian run_srvc.sh[2647]: [2024-05-02 11:22:48 -0700] [2647] [IN
 
 ```
 
-**Deployed as WSGI**  
-*  Uses Gunicorn WSGI
+**Deployed as WSGI**
+
+* Uses Gunicorn WSGI
 
 #### How-to Run this
+
 * Install Python Modules:
-    > pip3 install -r requirements.txt
+
+   > pip3 install -r requirements.txt
 
 * Get Reddit API key: https://www.reddit.com/wiki/api/
-
 * Gen SSL key/cert for secure connection to the service
-    > openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 3650
+
+   > openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 3650
 
 * Gen Symmetric encryption key for encrypting any text
+
    > ./tools/generate_keys.py
    > Encrption Key File text_encryption.key created
 
 * Create Database and tables:
-    See **reddit.sql**
+   See **reddit.sql**
 
-### Install Ollama-gpt 
+### Install Ollama-gpt
 
 #### Linux
-* https://github.com/ollama/ollama/blob/main/docs/linux.md
 
+* https://github.com/ollama/ollama/blob/main/docs/linux.md
 * Sample Debian Service config file: /etc/systemd/system/ollama.service
-```shell
+
+```sh {"id":"01J6QKN1V18CB6GSWCBVZF50XM"}
 [Service]
 Environment="OLLAMA_HOST=0.0.0.0"
 ..
@@ -278,12 +304,16 @@ Environment="OLLAMA_HOST=0.0.0.0"
 ```
 
 #### MacOS
+
 * I installed Ollama-gpt on my MacMini M1 - using brew
-```shell
+
+```sh {"id":"01J6QKN1V18CB6GSWCBZFWQWEH"}
 > brew install ollama
 ```
+
 * Start/Stop Service
-```shell
+
+```sh {"id":"01J6QKN1V18CB6GSWCC1KQGN1Z"}
 > brew services start ollama
 > brew services stop ollama
 ```
@@ -291,74 +321,92 @@ Environment="OLLAMA_HOST=0.0.0.0"
 **Bind Ollama server to local IPV4 address**
 
 * create a run shell script
-  ```shell
-  > /opt/homebrew/opt/ollama/bin
-  ```
+
+```sh {"id":"01J6QKN1V18CB6GSWCC1QPBHGS"}
+> /opt/homebrew/opt/ollama/bin
+```
+
 * Create a script named **ollama.sh** add the following
-  ```shell
-  #!/usr/bin/env bash
-  export OLLAMA_HOST=0.0.0.0
-  /opt/homebrew/bin/ollama $1
-  ```
+
+```sh {"id":"01J6QKN1V18CB6GSWCC313FJM7"}
+#!/usr/bin/env bash
+export OLLAMA_HOST=0.0.0.0
+/opt/homebrew/bin/ollama $1
+```
+
 * Make script "executable"
-  ```shell
-  chmod +x ollama.sh
-  ```
+
+```sh {"id":"01J6QKN1V18CB6GSWCC54NWP5H"}
+chmod +x ollama.sh
+```
+
 * Edit .plist file for the ollama homebrew service
-  ```shell
-    > cd /opt/homebrew/Cellar/ollama
-    > cd 0.1.24 #this may be different for your system
-    > vi homebrew.mxcl.ollama.plist
-  ```
+
+```sh {"id":"01J6QKN1V18CB6GSWCC7NXD2MH"}
+  > cd /opt/homebrew/Cellar/ollama
+  > cd 0.1.24 #this may be different for your system
+  > vi homebrew.mxcl.ollama.plist
+```
+
 * Change original line
-  > <string>/opt/homebrew/opt/ollama/bin/ollama</string>
 
-    TO this:
-  > <string>/opt/homebrew/opt/ollama/bin/ollama.sh</string>
+   > /opt/homebrew/opt/ollama/bin/ollama
+
+   TO this:
+
+   > /opt/homebrew/opt/ollama/bin/ollama.sh
+
 * Save file
+
 * stop/start service
-  ```shell
-  > brew services stop ollama && brew services start ollama
-  ```
-* Add following models to ollama-gpt: deepseek-llm,llama3,llama-pro 
-  ```shell
-  > for llm in deepseek-llm llama3 llama-pro gemma
-    do
-        ollama pull ${llm}
-    done
-  ```
+
+```sh {"id":"01J6QKN1V18CB6GSWCC9BRDQ7Q"}
+> brew services stop ollama && brew services start ollama
+```
+
+* Add following models to ollama-gpt: deepseek-llm,llama3,llama-pro
+
+```sh {"id":"01J6QKN1V18CB6GSWCC9E22XWF"}
+> for llm in deepseek-llm llama3 llama-pro gemma
+  do
+      ollama pull ${llm}
+  done
+```
+
 * Update setup.config with pertinent information (see setup.config.template)
-  ```text
-     # update with required information and save it as
-     #	setup.config file
-    [psqldb]
-    host=
-    port=5432
-    database=
-    user=
-    password=
 
-    [reddit]
-    client_id=
-    client_secret=
-    username=
-    password=
-    user_agent=
+```text {"id":"01J6QKN1V18CB6GSWCCDCC3GD4"}
+   # update with required information and save it as
+   #	setup.config file
+  [psqldb]
+  host=
+  port=5432
+  database=
+  user=
+  password=
 
-    [service]
-    JWT_SECRET_KEY=
-    SRVC_SHARED_SECRET=
-    IDENTITY=
-    APP_SECRET_KEY=
-    ENDPOINT_URL=
-    OLLAMA_API_URL=
-    LLMS=
-    ENCRYPTION_KEY=
-  ```
+  [reddit]
+  client_id=
+  client_secret=
+  username=
+  password=
+  user_agent=
+
+  [service]
+  JWT_SECRET_KEY=
+  SRVC_SHARED_SECRET=
+  IDENTITY=
+  APP_SECRET_KEY=
+  ENDPOINT_URL=
+  OLLAMA_API_URL=
+  LLMS=
+  ENCRYPTION_KEY=
+```
 
 * Run Rollama-GPT Service:
-    (see https://docs.gunicorn.org/en/stable/settings.html for config details)
-```shell
+   (see https://docs.gunicorn.org/en/stable/settings.html for config details)
+
+```sh {"id":"01J6QKN1V18CB6GSWCCE7YB8JM"}
     > gunicorn --certfile=cert.pem \
                --keyfile=key.pem \
                --bind 0.0.0.0:5000 \
@@ -367,38 +415,41 @@ Environment="OLLAMA_HOST=0.0.0.0"
                --threads 4 \
                --reload
 ```
+
 * Customize it to your hearts content!
-
-
 * **LICENSE**: The 3-Clause BSD License - license.txt
-
-
 * **TODO**:
-    - Add Swagger Docs
-    - Add long running task queue
-        - Queue: task_id, task_status, end_point
-    - Revisit Endpoint logic add robust error handling
-    - Add scheduler app - to schedule some of these events
-        - scheduler checks whether or not a similar tasks exists
-    - Add logic to handle list of lists with NUM_ELEMENTS_CHUNK elements
-        - retry after 429
-        - break down longer list of items into list of lists with small
-            chunks
+
+   - Add Swagger Docs
+   - Add long running task queue
+      - Queue: task_id, task_status, end_point
+
+   - Revisit Endpoint logic add robust error handling
+   - Add scheduler app - to schedule some of these events
+      - scheduler checks whether or not a similar tasks exists
+
+   - Add logic to handle list of lists with NUM_ELEMENTS_CHUNK elements
+      - retry after 429
+      - break down longer list of items into list of lists with small
+         chunks
 
 #### Example
-* These examples assume that environment variable **API_KEY** is using a valid API_KEY
 
+* These examples assume that environment variable __API_KEY__ is using a valid API_KEY
 
 **Get All comments for all Redditors in the database**
-```shell
+
+```sh {"id":"01J6QKN1V18CB6GSWCCF771MD4"}
 > export api_key=<api_key>
 >
 > export AT=$(curl -sk -X POST -H "Content-Type: application/json" -d '{"api_key":"'${api_key}'"}' \
   https://127.0.0.1:5000/login | jq -r .access_token) && curl -sk -X GET -H \
   "Authorization: Bearer ${AT}" 'https://127.0.0.1:5000/get_authors_comments'
 ```
+
 **On Service Console**:
-```shell
+
+```sh {"id":"01J6QKN1V18CB6GSWCCHR283KW"}
     INFO:root:Getting comments for Redditor
     INFO:root:Redditor 916 new comments
     INFO:root:Processing Author Redditor
@@ -406,21 +457,25 @@ Environment="OLLAMA_HOST=0.0.0.0"
     INFO:root:Processing Author Redditor
     INFO:root:Processing Author Redditor
 ```
+
 **Analyze a Post using Post ID that already exists in a post table in the database**
-```shell
+
+```sh {"id":"01J6QKN1V18CB6GSWCCJ338MKR"}
 > export AT=$(curl -sk -X POST -H "Content-Type: application/json" -d '{"api_key":"'${API_KEY}'"}' \
   https://127.0.0.1:5001/login | jq -r .access_token) && curl -sk -X GET -H \
   "Authorization: Bearer ${AT}" 'https://127.0.0.1:5001/analyze_post?post_id=<Reddit Post ID>'
 ```
+
 **Get and Analyze a Post using Post ID that has not yet been added to the post table in the database**
-```shell
+
+```sh {"id":"01J6QKN1V18CB6GSWCCNYHR4E0"}
 > export AT=$(curl -sk -X POST -H "Content-Type: application/json" -d '{"api_key":"'${API_KEY}'"}' \
   https://127.0.0.1:5001/login | jq -r .access_token) && curl -sk -X GET -H \
   "Authorization: Bearer ${AT}" 'https://127.0.0.1:5001/get_and_analyze_post?post_id=<Reddit Post ID>'
 ```
 
 ### General Workflow
-```mermaid
+
 flowchart TD
     A[Start] --> B[Read Configuration]
     B --> C[Connect to PostgreSQL]
@@ -443,19 +498,22 @@ flowchart TD
     P -- Yes --> Q[Join New Subreddits]
     Q --> O
     P -- No --> R[End]
-```
-#### pg_cron settings for scheduling function triggers
-**See rollama.sql for PGSQL functions and pg_cron installation**
 
-**Schedule pg_cron jobs**
-```shell
+#### pg_cron settings for scheduling function triggers
+
+__See rollama.sql for PGSQL functions and pg_cron installation__
+
+__Schedule pg_cron jobs__
+
+```sh {"id":"01J6QKN1V18CB6GSWCCQJ58XK2"}
 rollama=> SELECT cron.schedule('*/5 * * * *', 'select schedule_update()');
 SELECT cron.schedule('*/10 * * * *', $$delete from comments where comment_author = 'AutoModerator'$$);
 SELECT cron.schedule('*/10 * * * *', $$delete from posts where post_author = 'AutoModerator'$$);
 ```
 
-**Confirm that pg_cron jobs are loaded**
-```shell
+__Confirm that pg_cron jobs are loaded__
+
+```sh {"id":"01J6QKN1V18CB6GSWCCQQ9VJPS"}
 rrollama=> select * from cron.job;
  jobid |   schedule   |                           command                           | nodename  | nodeport | database | username | active | jobname
 -------+--------------+-------------------------------------------------------------+-----------+----------+----------+----------+--------+---------
@@ -463,12 +521,16 @@ rrollama=> select * from cron.job;
     24 | */10 * * * * | delete from posts where post_author = 'AutoModerator'       | localhost |     5432 | rollama  | rollama  | t      |
     25 | */10 * * * * | delete from comments where comment_author = 'AutoModerator' | localhost |     5432 | rollama  | rollama  | t      |
 ```
-**unschedule pg_cron jobs**
-```shell
+
+__unschedule pg_cron jobs__
+
+```sh {"id":"01J6QKN1V18CB6GSWCCQYP0KGP"}
 rollama=> SELECT cron.unschedule(<jobid from cron.jobs table>);
 ```
-**Confirm pg_cron job runs**
-```shell
+
+__Confirm pg_cron job runs__
+
+```sh {"id":"01J6QKN1V18CB6GSWCCV4FNNG8"}
 rollama=> select * from cron.job_run_details order by runid desc limit 5;
  jobid | runid | job_pid | database | username |                                                        command                                                         |  status   |                return_message                |          start_time           |           end_time
 -------+-------+---------+----------+----------+------------------------------------------------------------------------------------------------------------------------+-----------+----------------------------------------------+-------------------------------+-------------------------------
@@ -476,5 +538,7 @@ rollama=> select * from cron.job_run_details order by runid desc limit 5;
     16 |   947 |  286604 | rollama  | rollama  | select schedule_update()                                                                                               | succeeded | SELECT 1                                     | 2024-07-31 13:00:00.002889-07 | 2024-07-31 13:00:00.338836-07
     24 |   946 |  286603 | rollama  | rollama  | delete from posts where post_author = 'AutoModerator'                                                                  | succeeded | DELETE 0                                     | 2024-07-31 13:00:00.002287-07 | 2024-07-31 13:00:00.005317-07
 ```
+
 #### Database Schema
+
 ![Database Schema](database.png)
