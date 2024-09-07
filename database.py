@@ -52,14 +52,14 @@ def insert_data_into_table(table_name, data):
         placeholders = ', '.join(['%s'] * len(data))
         columns = ', '.join(data.keys())
         # Since the table keys that matter are set to UNIQUE value,
-        #   I find the ON CONFLICT DO NOTHING more effecient than
+        #   I find the ON CONFLICT DO NOTHING more efficient than
         #   doing a lookup before INSERT. This way original content
         #   is preserved by default. In case of updating existing
         #   data, one can write a method to safely update data
         #   while also preserving original data. For example use
         #   ON CONFLICT DO UPDATE. For now this'd do.
-        sql_query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders}) \
-                     ON CONFLICT DO NOTHING;"
+        sql_query = f"""INSERT INTO {table_name} ({columns}) VALUES ({placeholders}) \
+                     ON CONFLICT DO NOTHING;"""
         cur.execute(sql_query, list(data.values()))
         conn.commit()
         logging.debug("Inserted into %s data: %s", table_name, data)
@@ -74,12 +74,25 @@ def get_select_query_results(sql_query):
     conn, cur = psql_connection()
     try:
         cur.execute(sql_query)
-        result = cur.fetchall()
-        conn.close()
-        return result
+        # For SELECT query
+        if sql_query.upper().strip().startswith('SELECT'):
+            result = cur.fetchall()
+            return result
+        else:
+            # For UPDATE, DELETE, INSERT
+            conn.commit()
     except psycopg2.Error as e:
         logging.error("%s", e)
         raise
+    finally:
+        try:
+            cur.close()
+        except:
+            pass
+        try:
+            conn.close()
+        except:
+            pass
 
 def get_select_query_result_dicts(sql_query):
     """Execute a query, return all rows for the query as list of dictionaries"""
