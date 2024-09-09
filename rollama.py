@@ -72,9 +72,10 @@ from database import db_get_post_ids
 from database import db_get_comment_ids
 from gptutils import prompt_chat
 from reddit_api import create_reddit_instance
+from redditutils import get_upvote_count
+from redditutils import update_upvote_count
 from utils import unix_ts_str, sleep_to_avoid_429, get_vals_list_of_dicts
 from utils import calculate_prompt_completion_time, store_model_perf_info
-from websearch import store_websearch_results
 
 app = Flask('RedditScraper')
 
@@ -150,11 +151,8 @@ def analyze_post(post_id):
 
     logging.info('Analyzing post ID %s', post_id)
 
-    #TODO(fixme): handle updates to posts that may have occurred after they were
-    #       added to the database. Currently, posts are stored in their
-    #       original form as they were when they were collected.
     sql_query = f"""SELECT 
-                        post_title, post_body, post_id
+                        post_title, post_body, post_id, post_upvote_count
                     FROM
                         posts
                     WHERE
@@ -163,17 +161,26 @@ def analyze_post(post_id):
                         post_body 
                     NOT IN ('', '[removed]', '[deleted]');
                 """
-                
-    post_data =  get_select_query_results(sql_query)
-    
+    post_data_list = get_select_query_result_dicts(sql_query)
+
+    # should always return single row - post_id column is unique data
+    if len(post_data_list) == 1:
+        post_data = post_data_list[0]
+    else:
+        post_data = None
+
     if not post_data:
         logging.warning('Post ID %s contains no body', post_id)
         return
+    else:
+        latest_upvote_count = get_upvote_count(post_id)
+        if post_data['post_upvote_count'] != latest_upvote_count:
+            update_upvote_count(post_id, latest_upvote_count)
 
     # post_title, post_body for ChatGPT
-    text = post_data[0][0] + post_data[0][1]
+    text = post_data['post_title'] + post_data['post_body']
     # post_id
-    post_id = post_data[0][2]
+    post_id = post_data['post_id']
     try:
         language = detect(text)
         # starting at ollama 0.1.24 and .25, it hangs on greek text

@@ -2,10 +2,13 @@
 """Reddit client interaction utils
 """
 
+import logging
+
+from prawcore import exceptions
+
 # Import required local modules
 from config import get_config
 from database import get_select_query_results
-from database import execute_query
 from reddit_api import create_reddit_instance
 
 # constants
@@ -32,7 +35,17 @@ def reply_post(post_id):
         a_post = REDDIT.submission("1b0yadp")
         a_post.reply("WIP")
 
-def update_upvote_count(post_ids):
+def get_upvote_count(post_id):
+    """Get upvote count for a post id"""
+
+    try:
+        latest_post_upvote_count = REDDIT.submission(post_id).ups
+        return latest_post_upvote_count
+    except (AttributeError, TypeError, exceptions.NotFound) as e:
+        logging.error("Error: %s", e)
+        return False
+
+def update_upvote_count(post_id, latest_post_upvote_count):
     """Update vote count for a given post_id(s)
         expects a list of 1 or more
     """
@@ -40,16 +53,9 @@ def update_upvote_count(post_ids):
     column_name = "post_upvote_count"
     sql_query = ''
 
-    # batch updates if list > 1
-    if len(post_ids) > 1:
-        for post_id in post_ids:
-            latest_post_upvote_count = REDDIT.submission(post_id).ups
-            sql_query += f"""UPDATE posts SET '{column_name}' = '{latest_post_upvote_count}' \
-                            WHERE post_id = '{post_id}';"""
-        execute_query(sql_query)
+    sql_query = f"""UPDATE posts SET {column_name} = '{latest_post_upvote_count}' \
+                    WHERE post_id = '{post_id}';"""
+    if get_select_query_results(sql_query):
+        logging.info('Post ID %s updated', post_id)
     else:
-        for post_id in post_ids:
-            latest_post_upvote_count = REDDIT.submission(post_id).ups
-            sql_query = f"""UPDATE posts SET '{column_name}' = '{latest_post_upvote_count}' \
-                            WHERE post_id = '{post_id}';"""
-            execute_query(sql_query)
+        logging.error('Post ID %s was not updated', post_id)

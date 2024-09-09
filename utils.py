@@ -15,7 +15,7 @@ from datetime import datetime as DT
 from database import insert_data_into_table
 
 
-# substrings to be rplaced
+# substrings to be replaced
 TBR = ["As an AI language model, I don't have personal preferences or feelings. However,",
        "As an AI language model, I don't have personal preferences or opinions, but ",
        "I'm sorry to hear you're feeling that way! As an AI language model, I don't have access to real-time information on Hypmic or its future plans. However,",
@@ -61,11 +61,10 @@ def list_into_chunks(a_list, num_elements_chunk):
         num_elements_chunk elements
     """
 
-    if len(a_list) > num_elements_chunk:
-        for i in range(0, len(a_list), num_elements_chunk):
-            yield a_list[i:i + num_elements_chunk]
+    if len(a_list) > 0:
+        return [a_list[i:i + num_elements_chunk] for i in range(0, len(a_list), num_elements_chunk)]
     else:
-        yield a_list
+        return None
 
 def sleep_to_avoid_429(counter):
     """Sleep for a random number of seconds to avoid 429

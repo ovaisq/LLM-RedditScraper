@@ -3,12 +3,9 @@
 """DB Utils
 """
 
-import ast
-import json
 import logging
 import os
 import psycopg2
-from psycopg2.extras import RealDictCursor
 from config import get_config
 
 get_config()
@@ -77,10 +74,12 @@ def get_select_query_results(sql_query):
         # For SELECT query
         if sql_query.upper().strip().startswith('SELECT'):
             result = cur.fetchall()
+
             return result
         else:
             # For UPDATE, DELETE, INSERT
             conn.commit()
+            return True
     except psycopg2.Error as e:
         logging.error("%s", e)
         raise
