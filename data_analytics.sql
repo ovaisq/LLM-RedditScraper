@@ -1,3 +1,4 @@
+--Queries for Apache Superset Dashboard
 --all subreddits an author has posted to or commented in
 SELECT post_author, subreddit
 FROM (
@@ -33,10 +34,10 @@ FROM
   (SELECT model,
           AVG(prompt_completion_time) AS avg_completion_time
    FROM prompt_completion_details pcd
-   GROUP BY model) AS virtual_table
+   GROUP BY model, id
+   ORDER BY id DESC) AS virtual_table
 GROUP BY model
-ORDER BY "AVG(avg_completion_time)" DESC
-LIMIT 10000;
+ORDER BY "AVG(avg_completion_time)" DESC;
 --Total Successful Prompt Completions Per Day
 SELECT DATE_TRUNC('day', date) AS date,
        sum(num_analysis_documents) AS "SUM(num_analysis_documents)"
@@ -116,3 +117,14 @@ FROM
    order by subreddit,
             max_post_upvote_count desc) AS virtual_table
 LIMIT 1000;
+--Average Successful Prompt Completion time per model per Ollama Release
+SELECT ollama_ver::semver, model AS model,
+       AVG(avg_completion_time) AS "AVG(avg_completion_time)"
+FROM
+  (SELECT ollama_ver::semver, model,
+          AVG(prompt_completion_time) AS avg_completion_time
+   FROM prompt_completion_details pcd
+   where ollama_ver != 'false'
+   GROUP BY ollama_ver::semver, model, id order by id desc) AS virtual_table
+GROUP BY ollama_ver::semver, model
+ORDER BY ollama_ver::semver, model, "AVG(avg_completion_time)" desc;

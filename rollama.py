@@ -185,7 +185,7 @@ def analyze_post(post_id):
         language = detect(text)
         # starting at ollama 0.1.24 and .25, it hangs on greek text
         if language not in ('en'):
-            logging.warning('Skipping %s - langage detected %s', post_id, language)
+            logging.warning('Skipping %s - language detected %s', post_id, language)
             return
     except langdetect.lang_detect_exception.LangDetectException as e:
         logging.warning('Skipping %s - language detected UNKNOWN %s', post_id, e)
@@ -283,10 +283,10 @@ def analyze_comment(comment_id):
         language = detect(text)
         # starting at ollama 0.1.24 and .25, it hangs on greek text
         if language not in ('en'):
-            logging.warning('Skipping %s - langage detected %s', comment_id, language)
+            logging.warning('Skipping %s - language detected %s', comment_id, language)
             return
     except langdetect.lang_detect_exception.LangDetectException as e:
-        logging.warning('Skipping %s - langage detected UNKNOWN %s', comment_id, e)
+        logging.warning('Skipping %s - language detected UNKNOWN %s', comment_id, e)
 
     prompt = 'respond to this comment: '
 
