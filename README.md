@@ -4,7 +4,7 @@
 ### General Overview
 
 ```mermaid
-%%{init: {'theme': 'base', "loglevel":1,'themeVariables': {'lineColor': 'Blue', 'fontSize':'28px',"fontFamily": "Trebuchet MS"}}}%%
+%%{init: {'theme': 'base', "loglevel":1,'themeVariables': {'lineColor': 'Blue', "fontFamily": "Trebuchet MS"}}}%%
 flowchart TD
     style Reddit fill:#fff
     style RR fill:#a7e0f2,stroke:#13821a,stroke-width:4px
