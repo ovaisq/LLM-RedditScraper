@@ -142,6 +142,9 @@ graph LR
    - and all comments for each author.
 
 * Subscribes to subreddit that a submission was posted to
+* Title and content of each post, and content of each comment are prompted for a response
+    response by LLMS (llama3.1, gemma2, and internlm2), the responses along with metadata
+    are stored in PostgreSQL
 
 ### Build
 
