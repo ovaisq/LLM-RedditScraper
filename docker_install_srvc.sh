@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run inside docker container
+# run inside docker container ©2024, Ovais Quraishi
 
 # create directory if it doesn't exist
 create_directory() {

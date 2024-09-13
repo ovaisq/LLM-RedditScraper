@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tarball frontend
+# tarball frontend ©2024, Ovais Quraishi
 
 # Function to create directory if it doesn't exist
 create_directory() {

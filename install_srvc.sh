@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# ©2024, Ovais Quraishi
 
 # create directory if it doesn't exist
 create_directory() {

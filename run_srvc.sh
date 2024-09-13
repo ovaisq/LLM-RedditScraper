@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run service
+# run service ©2024, Ovais Quraishi
 
 SRVC_RUN_CONFIG_FILE=srvc_run_config.env
 SRVC_CONFIG_FILE=setup.config

@@ -1,15 +1,10 @@
----
-runme:
-  id: 01J6QKN1V2K76KBZTH9SRG036P
-  version: v3
----
-
 ## ROLLAMA-GPT
+©2024, Ovais Quraishi
 
 ### General Overview
 
 ```mermaid
-%%{init: {'theme': 'base', "loglevel":1,'themeVariables': {'lineColor': 'Blue', 'fontSize':'38px',"fontFamily": "Trebuchet MS"}}}%%
+%%{init: {'theme': 'base', "loglevel":1,'themeVariables': {'lineColor': 'Blue', 'fontSize':'28px',"fontFamily": "Trebuchet MS"}}}%%
 flowchart TD
     style Reddit fill:#fff
     style RR fill:#a7e0f2,stroke:#13821a,stroke-width:4px
@@ -34,7 +29,7 @@ flowchart TD
         end
     end
 
-    subgraph LocalEnv["`**Local&nbspEnvironment**`"]
+    subgraph LocalEnv["`**Local Environment**`"]
         subgraph blank[ ]
             direction TB
             PSQL[("`**PostgreSQL**`")]
@@ -76,7 +71,7 @@ flowchart TD
 #### Environment Configuration
 
 ```mermaid {"id":"01J6QKN1V0VMEGDS79WHZVDYY0"}
-%%{init: {'theme': 'base','themeVariables': {'lineColor': 'Blue', 'primaryColor':'#acbdda','tertiaryColor': '#436092'}}}%%
+%%{init: {'theme': 'base','themeVariables': {'lineColor': 'Blue', 'primaryColor':'#acbdda','tertiaryColor': '#436092','fontSize':'38==28px'}}}%%
 graph TD;
   style R fill:#a7e0f2,stroke:#13821a,stroke-width:2px
 
@@ -90,10 +85,10 @@ R(("`**Reddit Scraper API
     Node1[MacOS Sequoia 15.1 beta
     MacBook Pro M1 Max
     32GB RAM]
-    Node2["ESXi VM (Debian 12)
+    Node2["Debian 12 ESXi VM
     2 x nVidia GTX RTX3060
     12GB VRAM ea."]
-    Node3[Debian 12 PC
+    Node3[Debian 12 ESXI VM
     2 x NVIDIA RTX 4060 Ti
     16GB VRAM ea.
     ]

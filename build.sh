@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-# Function to create a directory if it doesn't exist
+# ©2024, Ovais Quraishi
+
+# Function to create a directory if it doesn't exist 
 create_directory() {
     local dir=$1
     if [ ! -d "$dir" ]; then

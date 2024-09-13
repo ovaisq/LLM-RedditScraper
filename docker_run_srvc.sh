@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run service from inside the docker container
+# run service from inside the docker container ©2024, Ovais Quraishi
 
 
 read_config(){

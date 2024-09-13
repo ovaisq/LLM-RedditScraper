@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# reload service
+# reload service ©2024, Ovais Quraishi
 
 SRVC_CONFIG_FILE=srvc_run_config.env
 

@@ -1,4 +1,4 @@
-# Use Debian Bookworm as the base image
+# Use Debian Bookworm as the base image ©2024, Ovais Quraishi
 FROM bitnami/minideb:bookworm
 
 WORKDIR /app/

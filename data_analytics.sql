@@ -1,4 +1,5 @@
 --Queries for Apache Superset Dashboard
+--©2024, Ovais Quraishi
 --all subreddits an author has posted to or commented in
 SELECT post_author, subreddit
 FROM (

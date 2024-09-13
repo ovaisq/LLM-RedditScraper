@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Reddit client interaction utils
+    ©2024, Ovais Quraishi
 """
 
 import logging
