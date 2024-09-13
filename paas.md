@@ -26,10 +26,10 @@ end
     direction TB
     subgraph Ollama["`**OLLAMA Server Cluster**`"]
         direction TB
-        dualGPU1["ESXi VM
+        dualGPU1["Debian 12 ESXi VM
         2 x RTX 3060 
         24GB VRAM"]
-        dualGPU2["Debian 12 Server
+        dualGPU2["Debian 12 ESXi VM
         2 x RTX 4060ti 
         32GB VRAM"]
         subgraph Llms["LLMs"]
