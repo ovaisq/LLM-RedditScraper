@@ -708,6 +708,18 @@ GRANT ALL ON TABLE public.websearch_results_ts TO rollama;
 GRANT ALL ON SEQUENCE public.websearch_results_ts_id_seq TO rollama;
 
 
+CREATE TABLE servicelogs (
+    id SERIAL PRIMARY KEY,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    host_name TEXT,
+    service_name TEXT,
+    message JSONB
+);
+
+ALTER TABLE servicelogs OWNER TO rollama;
+
+CREATE INDEX idx_gin_service_message ON servicelogs USING GIN (message);
+
 --
 -- PostgreSQL database dump complete
 --
