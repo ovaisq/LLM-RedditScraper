@@ -66,6 +66,12 @@ ARG LLMS
 ENV LLMS $LLMS
 ARG ENCRYPTION_KEY
 ENV ENCRYPTION_KEY $ENCRYPTION_KEY
+ARG redis_host
+ENV redis_host $redis_host
+ARG redis_port
+ENV redis_port $redis_port
+ARG redis_password
+ENV redis_password $redis_password
 
 # Run ROllama Run!
 CMD ["/usr/local/rollama/docker_run_srvc.sh"]

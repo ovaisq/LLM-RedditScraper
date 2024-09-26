@@ -10,6 +10,7 @@ flowchart TD
     style RR fill:#a7e0f2,stroke:#13821a,stroke-width:4px
     style LocalEnv fill:#a7e0f2
     style PSQL fill:#aaa
+    style REDIS fill:#aaa
 
     classDef subgraph_padding fill:none,stroke:none
     Rr[Redditor]
@@ -20,6 +21,7 @@ flowchart TD
     Rr ==> Reddit ===> RR ===> ORD
     ORD ===> OLLAMA ===> PRD ====> PSQL
     ORD ==> PSQL
+    ORD =="Analyzed Post/Comment IDs"==> REDIS
 
     subgraph Reddit["Reddit Website"]
         subgraph blank2[ ]
@@ -32,6 +34,7 @@ flowchart TD
     subgraph LocalEnv["`**Local Environment**`"]
         subgraph blank[ ]
             direction TB
+            REDIS[(Redis)]
             PSQL[("`**PostgreSQL**`")]
             subgraph ORD["Original Reddit Conent"]
                 subgraph blank3[ ]
@@ -43,7 +46,7 @@ flowchart TD
             end
             subgraph OLLAMA
                 subgraph blank4[ ]
-                    LLM1[internlm2]
+                    LLM1[llama3.2]
                     LLM2[llama3.1]
                     LLM3[gemma2]
                 end
@@ -145,6 +148,11 @@ graph LR
 * Title and content of each post, and content of each comment are prompted for a response
     response by LLMS (llama3.1, gemma2, and internlm2), the responses along with metadata
     are stored in PostgreSQL
+
+### Requirements
+* PostgreSQL v15 or greater
+* Redis v20 or greater
+* Ollama 0.3.12 or greater
 
 ### Build
 
@@ -374,31 +382,39 @@ chmod +x ollama.sh
 * Update setup.config with pertinent information (see setup.config.template)
 
 ```text {"id":"01J6QKN1V18CB6GSWCCDCC3GD4"}
-   # update with required information and save it as
-   #	setup.config file
-  [psqldb]
-  host=
-  port=5432
-  database=
-  user=
-  password=
+# update with required information and save it as
+#	setup.config file
+[psqldb]
+host=
+port=5432
+database=
+user=
+password=
 
-  [reddit]
-  client_id=
-  client_secret=
-  username=
-  password=
-  user_agent=
+[redis]
+redis_host=
+redis_port=
+redis_password=
 
-  [service]
-  JWT_SECRET_KEY=
-  SRVC_SHARED_SECRET=
-  IDENTITY=
-  APP_SECRET_KEY=
-  ENDPOINT_URL=
-  OLLAMA_API_URL=
-  LLMS=
-  ENCRYPTION_KEY=
+[reddit]
+client_id=
+client_secret=
+username=
+rpassword=
+user_agent=
+
+[service]
+APP_SECRET_KEY=
+CSRF_PROTECTION_KEY=
+DJANGO_SECRET_KEY=
+ENCRYPTION_KEY=
+ENDPOINT_URL=
+IDENTITY=
+JWT_SECRET_KEY=
+LLMS=
+OLLAMA_API_URL=
+PROC_WORKERS=
+SRVC_SHARED_SECRET=
 ```
 
 * Run Rollama-GPT Service:
@@ -473,7 +489,7 @@ chmod +x ollama.sh
 ```
 
 ### General Workflow
-
+```mermaid
 flowchart TD
     A[Start] --> B[Read Configuration]
     B --> C[Connect to PostgreSQL]
@@ -496,7 +512,7 @@ flowchart TD
     P -- Yes --> Q[Join New Subreddits]
     Q --> O
     P -- No --> R[End]
-
+```
 #### pg_cron settings for scheduling function triggers
 
 __See rollama.sql for PGSQL functions and pg_cron installation__

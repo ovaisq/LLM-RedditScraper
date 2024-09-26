@@ -13,3 +13,4 @@ python_daemon
 schedule
 urllib3
 duckduckgo_search
+redis

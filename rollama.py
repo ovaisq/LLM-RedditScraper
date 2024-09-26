@@ -62,6 +62,7 @@ from prawcore import exceptions
 from concurrent.futures import ProcessPoolExecutor
 
 # Import required local modules
+from cache import add_key
 from config import get_config
 from database import db_get_authors
 from database import insert_data_into_table
@@ -139,9 +140,13 @@ def analyze_posts():
     if not post_ids:
         return
 
-    with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
-        futures = [executor.submit(analyze_post, a_post_id) for a_post_id in post_ids]
-        results = [future.result() for future in futures]  # if you need the result of each analysis
+    #with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
+    #    futures = [executor.submit(analyze_post, a_post_id) for a_post_id in post_ids]
+    #    results = [future.result() for future in futures]  # if you need the result of each analysis
+
+    for post_id in post_ids:
+        if not add_key('reddit_id', post_id):
+            analyze_post(post_id)
 
     logging.info('All posts analyzed')
 
@@ -172,10 +177,10 @@ def analyze_post(post_id):
     if not post_data:
         logging.warning('Post ID %s contains no body', post_id)
         return
-    else:
-        latest_upvote_count = get_upvote_count(post_id)
-        if post_data['post_upvote_count'] != latest_upvote_count:
-            update_upvote_count(post_id, latest_upvote_count)
+    #else:
+    #    latest_upvote_count = get_upvote_count(post_id)
+    #    if post_data['post_upvote_count'] != latest_upvote_count:
+    #        update_upvote_count(post_id, latest_upvote_count)
 
     # post_title, post_body for ChatGPT
     text = post_data['post_title'] + post_data['post_body']
@@ -245,9 +250,13 @@ def analyze_comments():
         logging.warning('No comments to analyze')
         return
 
-    with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
-        futures = [executor.submit(analyze_comment, a_comment_id) for a_comment_id in comment_ids]
-        results = [future.result() for future in futures]  # if you need the result of each analysis
+    #with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
+    #    futures = [executor.submit(analyze_comment, a_comment_id) for a_comment_id in comment_ids]
+    #    results = [future.result() for future in futures]  # if you need the result of each analysis
+
+    for comment_id in comment_ids:
+        if not add_key('reddit_id', comment_id):
+            analyze_comment(comment_id)
 
     logging.info('All comments analyzed')
 

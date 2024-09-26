@@ -7,6 +7,11 @@ database=
 user=
 password=
 
+[redis]
+redis_host=
+redis_port=
+redis_password=
+
 [reddit]
 client_id=
 client_secret=
