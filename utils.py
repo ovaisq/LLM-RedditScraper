@@ -186,7 +186,8 @@ def store_model_perf_info(llm, analyzed_obj, prompt_completion_time):
                                        'details' : json.dumps(model_info_obj['details']),
                                        'expires_at' : model_info_obj['expires_at'],
                                        'size_vram' : model_info_obj['size_vram'],
-                                       'prompt_completion_time' : prompt_completion_time
+                                       'prompt_completion_time' : prompt_completion_time,
+                                       'tokens_per_second' : analyzed_obj['tokens_per_second']
                                      }
         insert_data_into_table('prompt_completion_details', prompt_completion_info_obj)
     except Exception as e:

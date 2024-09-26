@@ -48,6 +48,7 @@ async def prompt_chat(llm,
         # chatgpt analysis
         analysis = response['message']['content']
         analysis = sanitize_string(analysis)
+        tokens_per_second = (response['eval_count']/response['eval_duration'] * 1000000000)
 
         # this is for the analysis text only - the idea is to avoid
         #  duplicate text document, to allow indexing the column so
@@ -64,7 +65,8 @@ async def prompt_chat(llm,
                         'timestamp' : dt,
                         'shasum_512' : analysis_sha512,
                         'analysis' : analysis,
-                        'ollama_ver': OLLAMA_VER
+                        'ollama_ver': OLLAMA_VER,
+                        'tokens_per_second' : tokens_per_second
                         }
 
         return analyzed_obj, encrypt_analysis
