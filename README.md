@@ -21,7 +21,7 @@ flowchart TD
     Rr ==> Reddit ===> RR ===> ORD
     ORD ===> OLLAMA ===> PRD ====> PSQL
     ORD ==> PSQL
-    ORD =="Analyzed Post/Comment IDs"==> REDIS
+    PRD =="Analyzed Post/Comment IDs"==> REDIS
 
     subgraph Reddit["Reddit Website"]
         subgraph blank2[ ]
