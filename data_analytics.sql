@@ -139,8 +139,9 @@ FROM
      (SELECT model,
              AVG(tokens_per_second) AS avg_tokens_per_second
       FROM prompt_completion_details pcd
-      where ollama_ver NOT IN ('false',
+      WHERE ollama_ver NOT IN ('false',
                                '0.3.10-rc1')
+			AND tokens_per_second IS NOT NULL
       GROUP BY model,
                id
       ORDER BY id DESC) AS virtual_table
