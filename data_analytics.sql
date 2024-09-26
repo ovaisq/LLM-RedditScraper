@@ -129,3 +129,24 @@ FROM
    GROUP BY ollama_ver::semver, model, id order by id desc) AS virtual_table
 GROUP BY ollama_ver::semver, model
 ORDER BY ollama_ver::semver, model, "AVG(avg_completion_time)" desc;
+--Average Tokens Per Second Per Model
+SELECT model AS model,
+       AVG("AVG(avg_tokens_per_second)") AS "AVG(AVG(avg_tokens_per_second))"
+FROM
+  (SELECT model AS model,
+          AVG(avg_tokens_per_second) AS "AVG(avg_tokens_per_second)"
+   FROM
+     (SELECT model,
+             AVG(tokens_per_second) AS avg_tokens_per_second
+      FROM prompt_completion_details pcd
+      where ollama_ver NOT IN ('false',
+                               '0.3.10-rc1')
+      GROUP BY model,
+               id
+      ORDER BY id DESC) AS virtual_table
+   GROUP BY model
+   ORDER BY "AVG(avg_tokens_per_second)" DESC
+   LIMIT 10000) AS virtual_table
+GROUP BY model
+ORDER BY "AVG(AVG(avg_tokens_per_second))" DESC
+LIMIT 10000;
