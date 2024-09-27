@@ -33,6 +33,8 @@ if [[ -n $SSL_CERT && -n $SSL_KEY ]]; then
         gunicorn ${SRVC_NAME}:app --certfile=${SSL_CERT} --keyfile=${SSL_KEY} \
             --bind ${SRVC_HOST_IP}:${SRVC_HOST_PORT} \
             --timeout ${SRVC_TIMEOUT} --workers ${SRVC_WORKERS} \
+            --access-logfile /var/log/rollama_access.log \
+            --error-logfile /var/log/rollama_error.log \
             --log-level ${SRVC_LOG_LEVEL}
     else
         # If SSL certificates are provided but not valid, inform the user.
@@ -40,6 +42,8 @@ if [[ -n $SSL_CERT && -n $SSL_KEY ]]; then
         gunicorn ${SRVC_NAME}:app \
             --bind ${SRVC_HOST_IP}:${SRVC_HOST_PORT} \
             --timeout ${SRVC_TIMEOUT} --workers ${SRVC_WORKERS} \
+            --access-logfile /var/log/rollama_access.log \
+            --error-logfile /var/log/rollama_error.log \
             --log-level ${SRVC_LOG_LEVEL}
     fi
 fi

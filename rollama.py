@@ -60,6 +60,7 @@ from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
 from prawcore import exceptions
 from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 
 # Import required local modules
 from cache import add_key
@@ -140,13 +141,9 @@ def analyze_posts():
     if not post_ids:
         return
 
-    #with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
-    #    futures = [executor.submit(analyze_post, a_post_id) for a_post_id in post_ids]
-    #    results = [future.result() for future in futures]  # if you need the result of each analysis
-
-    for post_id in post_ids:
-        if not add_key('reddit_id', post_id):
-            analyze_post(post_id)
+    with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
+        futures = [executor.submit(analyze_post, a_post_id) for a_post_id in post_ids]
+        #DEBUG results = [future.result() for future in futures]  # if you need the result of each analysis
 
     logging.info('All posts analyzed')
 
@@ -177,39 +174,36 @@ def analyze_post(post_id):
     if not post_data:
         logging.warning('Post ID %s contains no body', post_id)
         return
-    #else:
-    #    latest_upvote_count = get_upvote_count(post_id)
-    #    if post_data['post_upvote_count'] != latest_upvote_count:
-    #        update_upvote_count(post_id, latest_upvote_count)
 
     # post_title, post_body for ChatGPT
     text = post_data['post_title'] + post_data['post_body']
     # post_id
     post_id = post_data['post_id']
-    try:
-        language = detect(text)
-        # starting at ollama 0.1.24 and .25, it hangs on greek text
-        if language not in ('en'):
-            logging.warning('Skipping %s - language detected %s', post_id, language)
-            return
-    except langdetect.lang_detect_exception.LangDetectException as e:
-        logging.warning('Skipping %s - language detected UNKNOWN %s', post_id, e)
-    prompt = 'respond to this post title and post body: '
+    if add_key('reddit_id', post_id):
+        try:
+            language = detect(text)
+            # starting at ollama 0.1.24 and .25, it hangs on greek text
+            if language not in ('en'):
+                gunicorn_logger.info('Skipping %s - language detected %s', post_id, language)
+                return
+        except langdetect.lang_detect_exception.LangDetectException as e:
+            gunicorn_logger.info('Skipping %s - language detected UNKNOWN %s', post_id, e)
+        prompt = 'respond to this post title and post body: '
 
-    for llm in LLMS:
-        start_time = time.time()
-        analyzed_obj, _ = asyncio.run(prompt_chat(llm, prompt + text, False))
-        end_time = time.time()
-        prompt_completion_time = calculate_prompt_completion_time(start_time, end_time)
+        for llm in LLMS:
+            start_time = time.time()
+            analyzed_obj, _ = asyncio.run(prompt_chat(llm, prompt + text, False))
+            end_time = time.time()
+            prompt_completion_time = calculate_prompt_completion_time(start_time, end_time)
 
-        # jsonb document
-        #  schema_version key added starting v2
-        analysis_document = {
-                            'schema_version' : '4',
-                            'source' : 'reddit',
-                            'category' : 'post',
-                            'reference_id' : post_id,
-                            'llm' : llm,
+            # jsonb document
+            #  schema_version key added starting v2
+            analysis_document = {
+                                'schema_version' : '4',
+                                'source' : 'reddit',
+                                'category' : 'post',
+                                'reference_id' : post_id,
+                                'llm' : llm,
                             'analysis' : analyzed_obj['analysis']
                             }
         analysis_data = {
@@ -250,13 +244,9 @@ def analyze_comments():
         logging.warning('No comments to analyze')
         return
 
-    #with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
-    #    futures = [executor.submit(analyze_comment, a_comment_id) for a_comment_id in comment_ids]
-    #    results = [future.result() for future in futures]  # if you need the result of each analysis
-
-    for comment_id in comment_ids:
-        if not add_key('reddit_id', comment_id):
-            analyze_comment(comment_id)
+    with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
+        futures = [executor.submit(analyze_comment, a_comment_id) for a_comment_id in comment_ids]
+        #DEBUG results = [future.result() for future in futures]  # if you need the result of each analysis
 
     logging.info('All comments analyzed')
 
@@ -287,44 +277,43 @@ def analyze_comment(comment_id):
     text = comment_data[0][1]
     # comment_id
     comment_id = comment_data[0][0]
-    
-    try:
-        language = detect(text)
-        # starting at ollama 0.1.24 and .25, it hangs on greek text
-        if language not in ('en'):
-            logging.warning('Skipping %s - language detected %s', comment_id, language)
-            return
-    except langdetect.lang_detect_exception.LangDetectException as e:
-        logging.warning('Skipping %s - language detected UNKNOWN %s', comment_id, e)
+    if add_key('reddit_id', comment_id): 
+        try:
+            language = detect(text)
+            # starting at ollama 0.1.24 and .25, it hangs on greek text
+            if language not in ('en'):
+                gunicorn_logger.info('Skipping %s - language detected %s', comment_id, language)
+                return
+        except langdetect.lang_detect_exception.LangDetectException as e:
+            gunicorn_logger.info('Skipping %s - language detected UNKNOWN %s', comment_id, e)
 
-    prompt = 'respond to this comment: '
+        prompt = 'respond to this comment: '
 
-    for llm in LLMS:
-        start_time = time.time()
-        analyzed_obj, _ = asyncio.run(prompt_chat(llm, prompt + text, False))
-        end_time = time.time()
-        prompt_completion_time = calculate_prompt_completion_time(start_time, end_time)
+        for llm in LLMS:
+            start_time = time.time()
+            analyzed_obj, _ = asyncio.run(prompt_chat(llm, prompt + text, False))
+            end_time = time.time()
+            prompt_completion_time = calculate_prompt_completion_time(start_time, end_time)
 
-        # jsonb document
-        #  schema_version key added starting v2
-        analysis_document = {
-                            'schema_version' : '4',
-                            'source' : 'reddit',
-                            'category' : 'comment',
-                            'reference_id' : comment_id,
-                            'llm' : llm,
-                            'analysis' : analyzed_obj['analysis']
+            # jsonb document
+            #  schema_version key added starting v2
+            analysis_document = {
+                                'schema_version' : '4',
+                                'source' : 'reddit',
+                                'category' : 'comment',
+                                'reference_id' : comment_id,
+                                'llm' : llm,
+                                'analysis' : analyzed_obj['analysis']
+                                }
+            analysis_data = {
+                            'timestamp': analyzed_obj['timestamp'],
+                            'shasum_512' : analyzed_obj['shasum_512'],
+                            'analysis_document' : json.dumps(analysis_document),
+                            'ollama_ver' : analyzed_obj['ollama_ver']
                             }
-        analysis_data = {
-                         'timestamp': analyzed_obj['timestamp'],
-                         'shasum_512' : analyzed_obj['shasum_512'],
-                         'analysis_document' : json.dumps(analysis_document),
-                         'ollama_ver' : analyzed_obj['ollama_ver']
-                        }
 
-        insert_data_into_table('analysis_documents', analysis_data)
-        store_model_perf_info(llm, analyzed_obj, prompt_completion_time)
-
+            insert_data_into_table('analysis_documents', analysis_data)
+            store_model_perf_info(llm, analyzed_obj, prompt_completion_time)
 
 @app.route('/get_sub_post', methods=['GET'])
 @jwt_required()
@@ -725,8 +714,8 @@ def get_and_analyze_comment(comment_id):
 
 if __name__ == "__main__":
 
-    logging.basicConfig(level=logging.INFO) # init logging
     gunicorn_logger = logging.getLogger('gunicorn.error')
+    logging.basicConfig(level=logging.DEBUG) # init logging
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
 

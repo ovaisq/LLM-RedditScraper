@@ -17,7 +17,6 @@ COPY *.TXT /app/
 COPY *.gz /app/
 COPY docker_install_srvc.sh /app/
 
-
 # Execute installation script
 RUN /app/docker_install_srvc.sh
 COPY setup.config.template /etc/rollama/setup.config 
