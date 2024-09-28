@@ -3,6 +3,7 @@ config.py
 database.py
 encryption.py
 gptutils.py
+logit.py
 license.txt
 reddit_api.py
 redditutils.py

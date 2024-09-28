@@ -71,6 +71,8 @@ ARG redis_port
 ENV redis_port $redis_port
 ARG redis_password
 ENV redis_password $redis_password
+ARG SRVC_NAME
+ENV SRVC_NAME $SRVC_NAME
 
 # Run ROllama Run!
 CMD ["/usr/local/rollama/docker_run_srvc.sh"]

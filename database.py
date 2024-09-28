@@ -59,7 +59,7 @@ def insert_data_into_table(table_name, data):
                      ON CONFLICT DO NOTHING;"""
         cur.execute(sql_query, list(data.values()))
         conn.commit()
-        logging.debug("Inserted into %s data: %s", table_name, data)
+        logging.info("Inserted into %s data: %s", table_name, data)
     except psycopg2.Error as e:
         logging.error("%s", e)
         raise

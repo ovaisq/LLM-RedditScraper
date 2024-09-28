@@ -60,7 +60,6 @@ from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
 from prawcore import exceptions
 from concurrent.futures import ProcessPoolExecutor
-from concurrent.futures import ThreadPoolExecutor
 
 # Import required local modules
 from cache import add_key
@@ -74,10 +73,9 @@ from database import db_get_post_ids
 from database import db_get_comment_ids
 from gptutils import prompt_chat
 from reddit_api import create_reddit_instance
-from redditutils import get_upvote_count
-from redditutils import update_upvote_count
 from utils import unix_ts_str, sleep_to_avoid_429, get_vals_list_of_dicts
 from utils import calculate_prompt_completion_time, store_model_perf_info
+from logit import log_message_to_db, get_rollama_version
 
 app = Flask('RedditScraper')
 
@@ -112,6 +110,18 @@ def login():
     # generate access token
     access_token = create_access_token(identity=os.environ['IDENTITY'])
     return jsonify(access_token=access_token), 200
+
+@app.route('/version', methods=['GET'])
+def get_version():
+    """Get service version semver
+    """
+    
+    response = get_rollama_version()
+
+    if isinstance(response, dict) and 'error' in response:
+        return jsonify(response), 400
+    elif isinstance(response, dict):
+        return jsonify(response)
 
 @app.route('/analyze_post', methods=['GET'])
 @jwt_required()
