@@ -8,6 +8,7 @@ import redis
 
 # Import required local modules
 from config import get_config
+import logit
 
 # constants
 get_config()
@@ -18,15 +19,30 @@ r = redis.Redis(host=os.environ['redis_host'],
                 password=os.environ['redis_password']
                )
 
+def ping_redis():
+    """Check if Redis connection is available"""
+    
+    try:
+        r.ping()
+    except Exception as e:
+        error_message = f"Redis connection failed: {e}"
+        logging.error(error_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'ERROR', error_message)
+        return False
+    
 def add_key(setname, key):
     """Add a key to a set in redis"""
 
     if lookup_key(setname, key):
-        logging.info('%s already exists', key)
+        info_message = f'{key} already exists'
+        logging.info(info_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
         return False
     else:
         r.sadd(setname, key)
-        logging.info('%s added', key)
+        info_message = f'{key} added'
+        logging.info(info_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
         return True
 
 def lookup_key(setname, key):
