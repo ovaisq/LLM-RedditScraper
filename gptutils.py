@@ -12,6 +12,7 @@ from ollama import AsyncClient
 
 from config import get_config
 from encryption import encrypt_text
+from logit import log_message_to_db, get_rollama_version
 from utils import ts_int_to_dt_obj
 from utils import sanitize_string
 from utils import get_semver
@@ -71,5 +72,6 @@ async def prompt_chat(llm,
 
         return analyzed_obj, encrypt_analysis
     except (httpx.ReadError, httpx.ConnectError) as e:
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version(), 'ERROR', e)
         logging.error('%s',e.args[0])
         raise httpx.ConnectError('Unable to reach Ollama Server') from None

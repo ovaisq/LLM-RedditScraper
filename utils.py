@@ -12,8 +12,7 @@ import time
 import random
 import string
 from datetime import datetime as DT
-from database import insert_data_into_table
-
+import database
 
 # substrings to be replaced
 TBR = ["As an AI language model, I don't have personal preferences or feelings. However,",
@@ -189,7 +188,12 @@ def store_model_perf_info(llm, analyzed_obj, prompt_completion_time):
                                        'prompt_completion_time' : prompt_completion_time,
                                        'tokens_per_second' : analyzed_obj['tokens_per_second']
                                      }
-        insert_data_into_table('prompt_completion_details', prompt_completion_info_obj)
+        database.insert_data_into_table('prompt_completion_details', prompt_completion_info_obj)
     except Exception as e:
         logging.error(e)
         return None
+
+def subtract_lists(list1, list2):
+    """Subtract two lists and return a single list of contents"""
+
+    return list(set(list1) - set(list2))

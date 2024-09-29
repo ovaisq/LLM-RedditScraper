@@ -6,7 +6,9 @@
 import logging
 import os
 import psycopg2
+from cache import get_set_contents
 from config import get_config
+from utils import subtract_lists
 
 get_config()
 
@@ -173,6 +175,9 @@ def db_get_post_ids():
 
     for a_post_id in post_ids:
         post_id_list.append(a_post_id[0])
+        
+    cached_list = get_set_contents('post_ids')
+    post_id_list = subtract_lists(post_id_list, cached_list)
 
     return post_id_list
 
@@ -203,5 +208,8 @@ def db_get_comment_ids():
 
     for a_comment_id in comment_ids:
         comment_id_list.append(a_comment_id[0])
+
+    cached_list = get_set_contents('comment_id')
+    comment_id_list = subtract_lists(comment_id_list, cached_list)
 
     return comment_id_list

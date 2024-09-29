@@ -33,3 +33,8 @@ def lookup_key(setname, key):
     """Look up if a key exists in the set"""
 
     return r.sismember(setname, key)
+
+def get_set_contents(set_name):
+    """Get contents of a redis set as a list"""
+
+    return list(r.smembers(set_name))

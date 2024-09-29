@@ -6,11 +6,12 @@ import os
 import json
 import logging
 import re
+import socket
 from pathlib import Path
 
 from database import insert_data_into_table
 
-def log_message_to_db(program_name, host_name, severity, log_message):
+def log_message_to_db(program_name, program_version, severity, log_message):
     """Log a message to the database.
 
         Args:
@@ -28,30 +29,25 @@ def log_message_to_db(program_name, host_name, severity, log_message):
     
     ts_now = datetime.datetime.now(tz=datetime.timezone.utc).isoformat(timespec='seconds', sep=' ')
     
-    if not host_name:
-        host_name = 'NO_HOSTNAME_AVAILABLE'
-    try:
-        # Define a dictionary with placeholder values
-        log_data = {
-                    'timestamp': ts_now,
-                    'host': host_name,
-                    'program_name': program_name,
-                    'program_version' : get_rollama_version(),
-                    'severity': severity,
-                    'message': log_message
-                   }
-
-        # payload for database
-        data = {
-                'timestamp' : ts_now,
-                'log_json' : json.dumps(log_data)
-               }
     
-        # insert data into table
-        insert_data_into_table('rollamalogs', data)
-    except KeyError as e:
-        log_message = f"{e}"
-        logging.error(log_message)
+    # Define a dictionary with placeholder values
+    log_data = {
+                'timestamp': ts_now,
+                'host': socket.gethostname(),
+                'program_name': program_name,
+                'program_version' : program_version,
+                'severity': severity,
+                'message': log_message
+               }
+
+    # payload for database
+    data = {
+            'timestamp' : ts_now,
+            'log_json' : json.dumps(log_data)
+           }
+    
+    # insert data into table
+    insert_data_into_table('rollamalogs', data)
 
 def get_rollama_version():
     """Reads the first line from /usr/local/rollama/ver.txt,
@@ -62,18 +58,13 @@ def get_rollama_version():
     """
 
     ver_file_path = '/usr/local/rollama/ver.txt'
+    ver_file_path = 'ver.txt'
 
     try:
-        host_name = os.environ['HOSTNAME']
         with open(str(Path(ver_file_path).resolve()), 'r') as f:
             first_line = f.readline().strip()
     except FileNotFoundError:
         log_message = f"File {ver_file_path} not found."
-        logging.error(log_message)
-        return False
-    except KeyError:
-        host_name = 'NOT_AVAILABLE'
-        log_message = 'Host name not available'
         logging.error(log_message)
         return False
 

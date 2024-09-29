@@ -44,7 +44,7 @@
         - Add long running task queue
             - Queue: task_id, task_status, end_point
             - Kafka
-        - Add logic to handle list of lists with NUM_ELEMENTS_CHUNK elementsimport configparser
+        - Add logic to handle list of lists with NUM_ELEMENTS_CHUNK elements
 """
 
 import asyncio
@@ -120,6 +120,11 @@ def get_version():
 
     if isinstance(response, dict) and 'error' in response:
         return jsonify(response), 400
+    elif response is False:  # New elif block to handle False responses
+        # Return a custom error message or status code
+        custom_error = {'message': 'Version information is not available'}
+        log_message_to_db(os.environ['SRVC_NAME'], 'VERSION_INFO_NOT_AVAILABLE', 'ERROR', custom_error)
+        return jsonify(custom_error), 500
     elif isinstance(response, dict):
         return jsonify(response)
 
@@ -182,22 +187,29 @@ def analyze_post(post_id):
         post_data = None
 
     if not post_data:
-        logging.warning('Post ID %s contains no body', post_id)
+        warn_message = f'Post ID {post_id} contains no body' 
+        logging.warning(warn_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
         return
 
     # post_title, post_body for ChatGPT
     text = post_data['post_title'] + post_data['post_body']
     # post_id
     post_id = post_data['post_id']
-    if add_key('reddit_id', post_id):
+    if add_key('post_id', post_id):
         try:
             language = detect(text)
             # starting at ollama 0.1.24 and .25, it hangs on greek text
             if language not in ('en'):
-                gunicorn_logger.info('Skipping %s - language detected %s', post_id, language)
+                info_message = f'Skipping {post_id} - language detected {language}'
+                gunicorn_logger.info(info_message)
+                log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
                 return
         except langdetect.lang_detect_exception.LangDetectException as e:
-            gunicorn_logger.info('Skipping %s - language detected UNKNOWN %s', post_id, e)
+            info_message = f'Skipping {post_id} - language detected UNKNOWN {e}'
+            gunicorn_logger.info(info_message)
+            log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
+            
         prompt = 'respond to this post title and post body: '
 
         for llm in LLMS:
@@ -287,15 +299,19 @@ def analyze_comment(comment_id):
     text = comment_data[0][1]
     # comment_id
     comment_id = comment_data[0][0]
-    if add_key('reddit_id', comment_id): 
+    if add_key('comment_id', comment_id): 
         try:
             language = detect(text)
             # starting at ollama 0.1.24 and .25, it hangs on greek text
             if language not in ('en'):
-                gunicorn_logger.info('Skipping %s - language detected %s', comment_id, language)
+                info_message = f'Skipping {comment_id} - language detected {language}'
+                gunicorn_logger.info(info_message)
+                log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
                 return
         except langdetect.lang_detect_exception.LangDetectException as e:
-            gunicorn_logger.info('Skipping %s - language detected UNKNOWN %s', comment_id, e)
+            info_message = f'Skipping {comment_id} - language detected UNKNOWN {e}'
+            gunicorn_logger.info(info_message)
+            log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
         prompt = 'respond to this comment: '
 
