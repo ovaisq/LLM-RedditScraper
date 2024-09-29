@@ -9,6 +9,7 @@ import psycopg2
 import cache
 from config import get_config
 from utils import subtract_lists
+import logit
 
 get_config()
 
@@ -27,7 +28,9 @@ def psql_connection(cursorfactory=None):
         psql_cur = psql_conn.cursor(cursor_factory=cursorfactory)
         return psql_conn, psql_cur
     except psycopg2.Error as e:
-        logging.error("Error connecting to PostgreSQL: %s", e)
+        error_message = f'Error connecting to PostgreSQL: {e}'
+        logging.error(error_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'ERROR', error_message)
         raise
 
 def execute_query(sql_query):
@@ -40,7 +43,9 @@ def execute_query(sql_query):
         conn.close()
         return result
     except psycopg2.Error as e:
-        logging.error("%s", e)
+        error_message = f'{e}'
+        logging.error(error_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'ERROR', error_message)
         raise
 
 def insert_data_into_table(table_name, data):
@@ -61,7 +66,10 @@ def insert_data_into_table(table_name, data):
                      ON CONFLICT DO NOTHING;"""
         cur.execute(sql_query, list(data.values()))
         conn.commit()
-        logging.info("Inserted into %s data: %s", table_name, data)
+        info_message = f'Inserted into {table_name}'
+        logging.info(info_message)
+        if table_name not in ['rollamalogs','servicelogs']:
+            logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'INFO', info_message)
     except psycopg2.Error as e:
         logging.error("%s", e)
         raise
@@ -76,14 +84,15 @@ def get_select_query_results(sql_query):
         # For SELECT query
         if sql_query.upper().strip().startswith('SELECT'):
             result = cur.fetchall()
-
             return result
         else:
             # For UPDATE, DELETE, INSERT
             conn.commit()
             return True
     except psycopg2.Error as e:
-        logging.error("%s", e)
+        error_message = f'{e}'
+        logging.error(error_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'ERROR', error_message)
         raise
     finally:
         try:
@@ -106,7 +115,9 @@ def get_select_query_result_dicts(sql_query):
         conn.close()
         return result
     except psycopg2.Error as e:
-        logging.error("%s", e)
+        error_message = f'{e}'
+        logging.error(error_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'ERROR', error_message)
         raise
 
 def get_new_data_ids(table_name, unique_column, reddit_data):
@@ -170,12 +181,14 @@ def db_get_post_ids():
 
     post_ids = get_select_query_results(sql_query)
     if not post_ids:
-        logging.warning("db_get_post_ids(): no post_ids found in DB")
+        warn_message = 'db_get_post_ids(): no post_ids found in DB'
+        logging.warning(warn_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'WARN', warn_message)
         return False
 
     for a_post_id in post_ids:
         post_id_list.append(a_post_id[0])
-        
+
     cached_list = cache.get_set_contents('post_ids')
     post_id_list = subtract_lists(post_id_list, cached_list)
 
@@ -203,7 +216,9 @@ def db_get_comment_ids():
 
     comment_ids = get_select_query_results(sql_query)
     if not comment_ids:
-        logging.warning("db_get_comment_ids(): no post_ids found in DB")
+        warn_message = 'db_get_comment_ids(): no post_ids found in DB'
+        logging.warning(warn_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'WARN', warn_message)
         return False
 
     for a_comment_id in comment_ids:

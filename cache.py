@@ -27,22 +27,22 @@ def ping_redis():
     except Exception as e:
         error_message = f"Redis connection failed: {e}"
         logging.error(error_message)
-        logit.log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'ERROR', error_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'ERROR', error_message)
         return False
     
 def add_key(setname, key):
     """Add a key to a set in redis"""
 
     if lookup_key(setname, key):
-        info_message = f'{key} already exists'
+        info_message = f'{setname}:{key} already exists'
         logging.info(info_message)
-        logit.log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'INFO', info_message)
         return False
     else:
         r.sadd(setname, key)
-        info_message = f'{key} added'
+        info_message = f'{setname}:{key} added'
         logging.info(info_message)
-        logit.log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'INFO', info_message)
         return True
 
 def lookup_key(setname, key):

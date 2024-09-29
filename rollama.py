@@ -115,7 +115,7 @@ def login():
 def get_version():
     """Get service version semver
     """
-    
+
     response = get_rollama_version()
 
     if isinstance(response, dict) and 'error' in response:
@@ -151,7 +151,10 @@ def analyze_posts():
     """Chat prompt a post title + post body
     """
 
-    logging.info('Analyzing Posts')
+    info_message = 'Analyzing Posts'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
+    
     post_ids = db_get_post_ids()
     if not post_ids:
         return
@@ -160,13 +163,17 @@ def analyze_posts():
         futures = [executor.submit(analyze_post, a_post_id) for a_post_id in post_ids]
         #DEBUG results = [future.result() for future in futures]  # if you need the result of each analysis
 
-    logging.info('All posts analyzed')
+    info_message = 'All posts analyzed'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
 def analyze_post(post_id):
     """Analyze text from Reddit Post
     """
 
-    logging.info('Analyzing post ID %s', post_id)
+    info_message = f'Analyzing post ID {post_id}'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
     sql_query = f"""SELECT 
                         post_title, post_body, post_id, post_upvote_count
@@ -202,12 +209,12 @@ def analyze_post(post_id):
             # starting at ollama 0.1.24 and .25, it hangs on greek text
             if language not in ('en'):
                 info_message = f'Skipping {post_id} - language detected {language}'
-                gunicorn_logger.info(info_message)
+                logging.info(info_message)
                 log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
                 return
         except langdetect.lang_detect_exception.LangDetectException as e:
             info_message = f'Skipping {post_id} - language detected UNKNOWN {e}'
-            gunicorn_logger.info(info_message)
+            logging.info(info_message)
             log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
             
         prompt = 'respond to this post title and post body: '
@@ -263,20 +270,26 @@ def analyze_comments():
     logging.info('Analyzing Comments')
     comment_ids = db_get_comment_ids()
     if not comment_ids:
-        logging.warning('No comments to analyze')
+        warn_message = 'No comments to analyze'
+        logging.warning(warn_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
         return
 
     with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
         futures = [executor.submit(analyze_comment, a_comment_id) for a_comment_id in comment_ids]
-        #DEBUG results = [future.result() for future in futures]  # if you need the result of each analysis
+        results = [future.result() for future in futures]  # if you need the result of each analysis
 
-    logging.info('All comments analyzed')
+    info_message = 'All comments analyzed'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
 def analyze_comment(comment_id):
     """Analyze text
     """
 
-    logging.info('Analyzing comment ID %s', comment_id)
+    info_message = f'Analyzing comment ID {comment_id}'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
     sql_query = f"""SELECT
                         comment_id, comment_body
@@ -288,11 +301,13 @@ def analyze_comment(comment_id):
                         comment_body
                     NOT IN ('', '[removed]', '[deleted]');
                 """
-    
+
     comment_data =  get_select_query_results(sql_query)
-    
+
     if not comment_data:
-        logging.warning('Comment ID %s contains no body', comment_id)
+        warn_message = f'Comment ID {comment_id} contains no body'
+        logging.warning(warn_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
         return
 
     # comment_body for ChatGPT
@@ -305,12 +320,12 @@ def analyze_comment(comment_id):
             # starting at ollama 0.1.24 and .25, it hangs on greek text
             if language not in ('en'):
                 info_message = f'Skipping {comment_id} - language detected {language}'
-                gunicorn_logger.info(info_message)
+                logging.info(info_message)
                 log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
                 return
         except langdetect.lang_detect_exception.LangDetectException as e:
             info_message = f'Skipping {comment_id} - language detected UNKNOWN {e}'
-            gunicorn_logger.info(info_message)
+            logging.info(info_message)
             log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
         prompt = 'respond to this comment: '
@@ -365,7 +380,9 @@ def get_sub_post(post_id):
     """Get a submission post
     """
 
-    logging.info('Getting post id %s', post_id)
+    info_message = f'Getting post id {post_id}'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
     post = REDDIT.submission(post_id)
     post_data = get_post_details(post)
@@ -376,7 +393,9 @@ def get_sub_posts(sub):
     """Get all posts for a given sub
     """
 
-    logging.info('Getting posts in subreddit %s', sub)
+    info_message = f'Getting posts in subreddit {sub}'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
     try:
         posts = REDDIT.subreddit(sub).hot(limit=None)
         new_post_ids = get_new_data_ids('posts', 'post_id', posts)
@@ -391,21 +410,26 @@ def get_sub_posts(sub):
                       'item_type': 'GET SUB POSTS',
                       'error': e.args[0]
                      }
-        insert_data_into_table('errors', error_data)
-        logging.warning('GET SUB POSTS %s %s', sub, e.args[0])
+        warn_message = f'GET SUB POSTS {sub} {e.args[0]}'
+        logging.warning(warn_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
 
 def get_post_comments(post_obj):
     """Get all comments made to a submission post
     """
 
-    logging.info('Getting comments for post %s', post_obj.id)
+    info_message = f'Getting comments for post {post_obj.id}'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
     submission = REDDIT.submission(post_obj.id)
     submission.comments.replace_more(limit=None)
     try:
         all_comments = submission.comments.list()
     except AttributeError:
-        logging.warning('%s has no comments', post_obj.id)
+        warn_message = f'{post_obj.id} has no comments'
+        logging.warning(warn_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
 
     # Create a dictionary to store parent-child relationships
     comment_dict = {c.id: c for c in all_comments}
@@ -506,7 +530,9 @@ def process_author(author_name):
     """Process author information.
     """
 
-    logging.info('Processing Author %s', author_name)
+    info_message = f'Processing Author {author_name}'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
     author_data = {}
     try:
@@ -525,8 +551,9 @@ def process_author(author_name):
                       'item_type': 'AUTHOR',
                       'error': e.args[0]
                      }
-        insert_data_into_table('errors', error_data)
-        logging.warning('AUTHOR %s %s', author_name, e.args[0])
+        warn_message = f'AUTHOR {author_name} {e.args[0]}'
+        logging.warning(warn_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
 
 def get_author(anauthor):
     """Get author info of a comment or a submission
@@ -559,7 +586,9 @@ def get_authors_comments():
 
     authors = db_get_authors()
     if not authors:
-        logging.warning('db_get_authors(): No authors found in DB')
+        warn_message = f'db_get_authors(): No authors found in DB'
+        logging.warning(warn_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
         return
 
     counter = 0
@@ -575,28 +604,35 @@ def get_authors_comments():
                           'item_type': 'REDDITOR DELETED',
                           'error': e.args[0]
                          }
-            insert_data_into_table('errors', error_data)
-            logging.warning('AUTHOR DELETED %s %s', an_author, e.args[0])
+            warn_message = f'AUTHOR DELETED {an_author} {e.args[0]}'
+            logging.warning(warn_message)
+            log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
 
 
 def get_author_comments(author):
     """Get author comments, author posts, insert data into db
     """
 
-    logging.info('Getting comments for %s', author)
+    info_message = f'Getting comments for {author}'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
     try:
         redditor = REDDIT.redditor(author)
         comments = redditor.comments.hot(limit=None)
         author_comments = get_new_data_ids('comments', 'comment_id', comments)
         if not author_comments:
-            logging.info('%s has no new comments', author)
+            info_message = f'{author} has no new comments'
+            logging.info(info_message)
+            log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
             return
 
         counter = 0
         if author_comments:
             num_comments = len(author_comments)
-            logging.info('%s %s new comments', author, num_comments)
+            info_message = f'{author} {num_comments} new comments'
+            logging.info(info_message)
+            log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
             for comment_id in author_comments:
                 comment = REDDIT.comment(comment_id)
                 process_comment(comment)
@@ -609,8 +645,9 @@ def get_author_comments(author):
                       'item_type': 'COMMENT',
                       'error': e.args[0]
                      }
-        insert_data_into_table('errors', error_data)
-        logging.warning('AUTHOR COMMENT %s %s', comment_id, e.args[0])
+        warn_message = f'AUTHOR COMMENT {comment_id} {e.args[0]}'
+        logging.warning(warn_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
 
     # when author has no comments available - either author has been removed or blocked
     except exceptions.Forbidden as e:
@@ -636,7 +673,9 @@ def join_new_subs():
     """Join newly discovered subreddits
     """
 
-    logging.info('Joining New Subs')
+    info_message = 'Joining New Subs'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
     dt = unix_ts_str()
 
@@ -660,13 +699,17 @@ def join_new_subs():
     new_sub_rows = get_select_query_result_dicts(sql_query)
     
     if not new_sub_rows:
-        logging.info('No new subreddits to join')
+        info_message = 'No new subreddits to join'
+        logging.info(info_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
         return
 
     if new_sub_rows:
         subs = get_vals_list_of_dicts('subreddit', new_sub_rows)
         for new_sub in subs:
-            logging.info('Joining new sub %s', new_sub)
+            info_message = f'Joining new sub {new_sub}'
+            logging.info(info_message)
+            log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
             try:
                 REDDIT.subreddit(new_sub).subscribe()
                 sub_data = {
@@ -681,8 +724,9 @@ def join_new_subs():
                               'item_type': 'SUBREDDIT',
                               'error': e.args[0]
                              }
-                insert_data_into_table('errors', error_data)
-                logging.error('Unable to join %s - %s', new_sub, e.args[0])
+                error_message = f'Unable to join {new_sub} {e.args[0]}'
+                logging.error(error_message)
+                log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'ERROR', error_message)
 
 @app.route('/get_and_analyze_post', methods=['GET'])
 @jwt_required()
@@ -700,11 +744,15 @@ def get_and_analyze_post(post_id):
 
     post_ids = db_get_post_ids()
     if not post_ids or post_id not in post_ids:
-        logging.warning('Post ID %s not found in local database', post_id)
+        warn_message = f'Post ID {post_id} not found in local database'
+        logging.warning(warn_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
         get_sub_post(post_id)
         analyze_post(post_id)
     else:
-        logging.info('Post ID %s has already been analyzed', post_id)
+        info_message = f'Post ID {post_id} has already been analyzed'
+        logging.info(info_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
 @app.route('/get_and_analyze_comment', methods=['GET'])
 @jwt_required()
@@ -720,7 +768,9 @@ def get_comment(comment_id):
     """Get a Reddit comment
     """
 
-    logging.info('Getting comment id %s', comment_id)
+    info_message = f'Getting comment id {comment_id}'
+    logging.info(info_message)
+    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
     comment = REDDIT.comment(comment_id)
     comment_data = get_comment_details(comment)
@@ -732,11 +782,15 @@ def get_and_analyze_comment(comment_id):
 
     comment_ids = db_get_comment_ids()
     if not comment_ids or comment_id not in comment_ids:
-        logging.warning('Comment ID %s not found in local database', comment_id)
+        warn_message = f'Comment ID {comment_id} not found in local database'
+        logging.warning(warn_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
         get_comment(comment_id)
         analyze_comment(comment_id)
     else:
-        logging.info('Comment ID %s has already been analyzed', comment_id)
+        info_message = 'Comment ID {comment_id} has already been analyzed'
+        logging.info(info_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
 if __name__ == "__main__":
 
