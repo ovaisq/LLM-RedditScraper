@@ -6,6 +6,7 @@
 import logging
 import os
 import praw
+import logit
 from praw import exceptions
 from config import get_config
 
@@ -24,5 +25,7 @@ def create_reddit_instance():
                             )
         return reddit
     except exceptions.APIException as e:
-        logging.error("Unable to reach Reddit API: %s", e)
+        error_message = f'Unable to reach Reddit API: {e}'
+        logging.error(error_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'ERROR', error_message)
         raise

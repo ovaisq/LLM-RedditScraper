@@ -13,6 +13,7 @@ import random
 import string
 from datetime import datetime as DT
 import database
+import logit
 
 # substrings to be replaced
 TBR = ["As an AI language model, I don't have personal preferences or feelings. However,",
@@ -190,7 +191,9 @@ def store_model_perf_info(llm, analyzed_obj, prompt_completion_time):
                                      }
         database.insert_data_into_table('prompt_completion_details', prompt_completion_info_obj)
     except Exception as e:
-        logging.error(e)
+        error_message = f'{e}'
+        logging.error(error_message)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'ERROR', error_message)
         return None
 
 def subtract_lists(list1, list2):

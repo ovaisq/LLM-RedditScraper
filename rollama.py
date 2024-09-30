@@ -658,7 +658,9 @@ def get_author_comments(author):
                       'error': e.args[0]
                      }
         insert_data_into_table('errors', error_data)
-        logging.warning('AUTHOR COMMENT %s %s', author, e.args[0])
+        warn_message = f'AUTHOR COMMENT {author} {e.args[0]}'
+        logging.warning(warn_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
 
 @app.route('/join_new_subs', methods=['GET'])
 @jwt_required()
