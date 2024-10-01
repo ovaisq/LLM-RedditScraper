@@ -3,6 +3,7 @@
 # ©2024, Ovais Quraishi
 
 import logging
+import json
 import os
 import redis
 
@@ -47,8 +48,12 @@ def add_key(setname, key):
 
 def lookup_key(setname, key):
     """Look up if a key exists in the set"""
-
-    return r.sismember(setname, key)
+    try:
+        result = r.sismember(setname, key)
+        return result
+    except redis.exceptions.DataError as e:
+        logging.error(e)
+        logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'ERROR', {'error':str(e)})
 
 def get_set_contents(set_name):
     """Get contents of a redis set as a list"""

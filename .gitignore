@@ -16,6 +16,8 @@ FE_BUILD_INFO.TXT
 previous_ver.txt
 get_replies.py
 .DS_Store
+dinky.py
+large.py
 
 # Django #
 *.log

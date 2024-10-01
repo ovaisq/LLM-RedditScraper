@@ -161,7 +161,8 @@ def analyze_posts():
 
     with ProcessPoolExecutor(max_workers=PROC_WORKERS) as executor:  # PROC_WORKERS in setup.cfg
         futures = [executor.submit(analyze_post, a_post_id) for a_post_id in post_ids]
-        #DEBUG results = [future.result() for future in futures]  # if you need the result of each analysis
+        results = [future.result() for future in futures]  # if you need the result of each analysis
+        
 
     info_message = 'All posts analyzed'
     logging.info(info_message)
@@ -407,11 +408,6 @@ def get_sub_posts(sub):
             counter = sleep_to_avoid_429(counter)
     except AttributeError as e:
         # store this for later inspection
-        error_data = {
-                      'item_id': sub,
-                      'item_type': 'GET SUB POSTS',
-                      'error': e.args[0]
-                     }
         warn_message = f'GET SUB POSTS {sub} {e.args[0]}'
         logging.warning(warn_message)
         log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
@@ -550,11 +546,6 @@ def process_author(author_name):
         except (AttributeError, TypeError, exceptions.NotFound) as e:
             # store this for later inspection
             add_key('author_id', author_name)
-            error_data = {
-                        'item_id': author_name,
-                        'item_type': 'AUTHOR',
-                        'error': e.args[0]
-                        }
             warn_message = f'AUTHOR {author_name} {e.args[0]}'
             logging.warning(warn_message)
             log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
@@ -590,23 +581,24 @@ def get_authors_comments():
 
     authors = db_get_authors()
     if not authors:
-        warn_message = f'db_get_authors(): No authors found in DB'
+        warn_message = 'db_get_authors(): No authors found in DB'
         logging.warning(warn_message)
         log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
         return
 
     counter = 0
     for an_author in authors:
-        try:
-            REDDIT.redditor(an_author)
-            get_author_comments(an_author)
-            counter = sleep_to_avoid_429(counter)
-        except exceptions.NotFound as e:
-            # store this for later inspection
-            add_key('author_id', an_author)
-            warn_message = f'REDDITOR DELETED {an_author} {e.args[0]}'
-            logging.warning(warn_message)
-            log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
+        if not lookup_key('author_id', an_author):
+            try:
+                REDDIT.redditor(an_author)
+                get_author_comments(an_author)
+                counter = sleep_to_avoid_429(counter)
+            except exceptions.NotFound as e:
+                # store this for later inspection
+                add_key('author_id', an_author)
+                warn_message = f'REDDITOR DELETED {an_author} {e.args[0]}'
+                logging.warning(warn_message)
+                log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
 
 
 def get_author_comments(author):
@@ -640,11 +632,6 @@ def get_author_comments(author):
 
     except AttributeError as e:
         # store this for later inspection
-        error_data = {
-                      'item_id': comment_id,
-                      'item_type': 'COMMENT',
-                      'error': e.args[0]
-                     }
         warn_message = f'AUTHOR COMMENT {comment_id} {e.args[0]}'
         logging.warning(warn_message)
         log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
@@ -652,11 +639,6 @@ def get_author_comments(author):
     # when author has no comments available - either author has been removed or blocked
     except exceptions.Forbidden as e:
         # store this for later inspection
-        error_data = {
-                      'item_id': 'COMMENT_ID_NOT_AVAILABLE',
-                      'item_type': 'COMMENT',
-                      'error': e.args[0]
-                     }
         add_key('author_id', author)
         warn_message = f'FOLLOWING AUTHOR {author} {e.args[0]}'
         logging.warning(warn_message)
@@ -721,11 +703,6 @@ def join_new_subs():
                 insert_data_into_table('subscription', sub_data)
             except (exceptions.Forbidden, exceptions.NotFound) as e:
                 # store this for later inspection
-                error_data = {
-                              'item_id': new_sub,
-                              'item_type': 'SUBREDDIT',
-                              'error': e.args[0]
-                             }
                 error_message = f'Unable to join {new_sub} {e.args[0]}'
                 logging.error(error_message)
                 log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'ERROR', error_message)

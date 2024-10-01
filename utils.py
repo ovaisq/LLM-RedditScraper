@@ -119,7 +119,7 @@ def get_model_from_list(name):
     else:
         actual_name = name+':latest'
 
-    dicts = get_model_info(name)
+    dicts = get_model_info()
     # find the matching dictionary
     for model in dicts:
         if model['name'] == actual_name:
@@ -154,7 +154,7 @@ def get_semver():
         logging.error('Failed to get SemVer. Status code: %s', {response.status_code})
         return False
 
-def get_model_info(llm):
+def get_model_info():
     """Retrieve model information from a specified API endpoint.
     """
     
