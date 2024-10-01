@@ -62,7 +62,7 @@ from prawcore import exceptions
 from concurrent.futures import ProcessPoolExecutor
 
 # Import required local modules
-from cache import add_key
+from cache import add_key, lookup_key
 from config import get_config
 from database import db_get_authors
 from database import insert_data_into_table
@@ -208,11 +208,13 @@ def analyze_post(post_id):
             language = detect(text)
             # starting at ollama 0.1.24 and .25, it hangs on greek text
             if language not in ('en'):
+                add_key('post_id', post_id)
                 info_message = f'Skipping {post_id} - language detected {language}'
                 logging.info(info_message)
                 log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
                 return
         except langdetect.lang_detect_exception.LangDetectException as e:
+            add_key('post_id', post_id)
             info_message = f'Skipping {post_id} - language detected UNKNOWN {e}'
             logging.info(info_message)
             log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
@@ -319,11 +321,13 @@ def analyze_comment(comment_id):
             language = detect(text)
             # starting at ollama 0.1.24 and .25, it hangs on greek text
             if language not in ('en'):
+                add_key('comment_id', comment_id)
                 info_message = f'Skipping {comment_id} - language detected {language}'
                 logging.info(info_message)
                 log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
                 return
         except langdetect.lang_detect_exception.LangDetectException as e:
+            add_key('comment_id', comment_id)
             info_message = f'Skipping {comment_id} - language detected UNKNOWN {e}'
             logging.info(info_message)
             log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
@@ -529,31 +533,33 @@ def get_authors_comments_endpoint():
 def process_author(author_name):
     """Process author information.
     """
+    
+    if not lookup_key('author_id', author_name):
+        info_message = f'Processing Author {author_name}'
+        logging.info(info_message)
+        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
-    info_message = f'Processing Author {author_name}'
-    logging.info(info_message)
-    log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
-
-    author_data = {}
-    try:
-        author = REDDIT.redditor(author_name)
-        if author.name != 'AutoModerator':
-            author_data = {
-                           'author_id': author.id,
-                           'author_name': author.name,
-                           'author_created_utc': int(author.created_utc),
-                          }
-            insert_data_into_table('authors', author_data)
-    except (AttributeError, TypeError, exceptions.NotFound) as e:
-        # store this for later inspection
-        error_data = {
-                      'item_id': author_name,
-                      'item_type': 'AUTHOR',
-                      'error': e.args[0]
-                     }
-        warn_message = f'AUTHOR {author_name} {e.args[0]}'
-        logging.warning(warn_message)
-        log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
+        author_data = {}
+        try:
+            author = REDDIT.redditor(author_name)
+            if author.name != 'AutoModerator':
+                author_data = {
+                            'author_id': author.id,
+                            'author_name': author.name,
+                            'author_created_utc': int(author.created_utc),
+                            }
+                insert_data_into_table('authors', author_data)
+        except (AttributeError, TypeError, exceptions.NotFound) as e:
+            # store this for later inspection
+            add_key('author_id', author_name)
+            error_data = {
+                        'item_id': author_name,
+                        'item_type': 'AUTHOR',
+                        'error': e.args[0]
+                        }
+            warn_message = f'AUTHOR {author_name} {e.args[0]}'
+            logging.warning(warn_message)
+            log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
 
 def get_author(anauthor):
     """Get author info of a comment or a submission
@@ -599,12 +605,8 @@ def get_authors_comments():
             counter = sleep_to_avoid_429(counter)
         except exceptions.NotFound as e:
             # store this for later inspection
-            error_data = {
-                          'item_id': an_author,
-                          'item_type': 'REDDITOR DELETED',
-                          'error': e.args[0]
-                         }
-            warn_message = f'AUTHOR DELETED {an_author} {e.args[0]}'
+            add_key('author_id', an_author)
+            warn_message = f'REDDITOR DELETED {an_author} {e.args[0]}'
             logging.warning(warn_message)
             log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
 
@@ -657,8 +659,8 @@ def get_author_comments(author):
                       'item_type': 'COMMENT',
                       'error': e.args[0]
                      }
-        insert_data_into_table('errors', error_data)
-        warn_message = f'AUTHOR COMMENT {author} {e.args[0]}'
+        add_key('author_id', author)
+        warn_message = f'FOLLOWING AUTHOR {author} {e.args[0]}'
         logging.warning(warn_message)
         log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
 
