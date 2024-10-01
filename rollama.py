@@ -208,13 +208,11 @@ def analyze_post(post_id):
             language = detect(text)
             # starting at ollama 0.1.24 and .25, it hangs on greek text
             if language not in ('en'):
-                add_key('post_id', post_id)
                 info_message = f'Skipping {post_id} - language detected {language}'
                 logging.info(info_message)
                 log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
                 return
         except langdetect.lang_detect_exception.LangDetectException as e:
-            add_key('post_id', post_id)
             info_message = f'Skipping {post_id} - language detected UNKNOWN {e}'
             logging.info(info_message)
             log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
