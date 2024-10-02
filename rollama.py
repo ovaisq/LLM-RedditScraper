@@ -527,7 +527,7 @@ def get_authors_comments_endpoint():
 def process_author(author_name):
     """Process author information.
     """
-    
+
     if not lookup_key('author_id', author_name):
         info_message = f'Processing Author {author_name}'
         logging.info(info_message)
@@ -599,6 +599,11 @@ def get_authors_comments():
                 warn_message = f'REDDITOR DELETED {an_author} {e.args[0]}'
                 logging.warning(warn_message)
                 log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
+            except AttributeError as e:
+                add_key('author_id', an_author)
+                warn_message = f'REDDITOR DELETED {an_author} {e.args[0]}'
+                logging.warning(warn_message)
+                log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
 
 
 def get_author_comments(author):
@@ -612,7 +617,13 @@ def get_author_comments(author):
     try:
         redditor = REDDIT.redditor(author)
         comments = redditor.comments.hot(limit=None)
-        author_comments = get_new_data_ids('comments', 'comment_id', comments)
+        
+        # if author has any comments associated
+        if comments.yielded > 0:
+            author_comments = get_new_data_ids('comments', 'comment_id', comments)
+        else:
+            author_comments = None
+            
         if not author_comments:
             info_message = f'{author} has no new comments'
             logging.info(info_message)
