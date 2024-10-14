@@ -462,7 +462,7 @@ def get_post_details(post):
 
     post_author = post.author.name if post.author else None
 
-    if post_author != 'AutoModerator':
+    if post_author and post_author != 'AutoModerator':
         process_author(post_author)
 
     post_data = {
@@ -488,7 +488,7 @@ def get_comment_details(comment):
     comment_submitter = comment.is_submitter if hasattr(comment, 'is_submitter') else None
     comment_edited = str(int(comment.edited)) if comment.edited else False
 
-    if comment_author != 'AutoModerator':
+    if comment_author and comment_author != 'AutoModerator':
         process_author(comment_author)
 
     comment_data = {
@@ -554,8 +554,9 @@ def get_author(anauthor):
     """Get author info of a comment or a submission
     """
 
-    process_author(anauthor)
-    get_author_comments(anauthor)
+    if anauthor:
+        process_author(anauthor)
+        get_author_comments(anauthor)
 
 def process_comment(comment):
     """Process a single comment
@@ -618,11 +619,7 @@ def get_author_comments(author):
         redditor = REDDIT.redditor(author)
         comments = redditor.comments.hot(limit=None)
         
-        # if author has any comments associated
-        if comments.yielded > 0:
-            author_comments = get_new_data_ids('comments', 'comment_id', comments)
-        else:
-            author_comments = None
+        author_comments = get_new_data_ids('comments', 'comment_id', comments)
             
         if not author_comments:
             info_message = f'{author} has no new comments'
