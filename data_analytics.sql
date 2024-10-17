@@ -151,3 +151,37 @@ FROM
 GROUP BY model
 ORDER BY "AVG(AVG(avg_tokens_per_second))" DESC
 LIMIT 10000;
+
+--Number of remaining comments and posts to be analyzed by LLMs
+WITH filtered_comments AS (
+    SELECT comment_id
+    FROM comments
+    WHERE comment_body NOT IN ('', '[removed]', '[deleted]')
+),
+filtered_posts AS (
+    SELECT post_id
+    FROM posts
+    WHERE post_body NOT IN ('', '[removed]', '[deleted]')
+)
+SELECT 'comments' AS label, COUNT(c.comment_id) AS count
+FROM filtered_comments c
+LEFT JOIN analysis_documents ad
+ON (ad.analysis_document ->> 'comment_id' = c.comment_id OR ad.analysis_document ->> 'reference_id' = c.comment_id)
+WHERE ad.analysis_document IS NULL
+
+UNION ALL
+
+SELECT 'posts' AS label, COUNT(p.post_id) AS count
+FROM filtered_posts p
+WHERE NOT EXISTS (
+        SELECT 1
+        FROM analysis_documents
+        WHERE analysis_document ->> 'post_id' = p.post_id
+            AND analysis_document ->> 'post_id' IS NOT NULL
+    )
+AND NOT EXISTS (
+        SELECT 1
+        FROM analysis_documents
+        WHERE analysis_document ->> 'reference_id' = p.post_id
+            AND analysis_document ->> 'reference_id' IS NOT NULL
+    );
