@@ -1,4 +1,3 @@
---©2024, Ovais Quraishi
 --
 -- PostgreSQL database dump
 --
@@ -25,7 +24,7 @@ CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
 
 
 --
--- Name: EXTENSION pg_cron; Type: COMMENT; Schema: -; Owner:
+-- Name: EXTENSION pg_cron; Type: COMMENT; Schema: -; Owner: 
 --
 
 COMMENT ON EXTENSION pg_cron IS 'Job scheduler for PostgreSQL';
@@ -39,11 +38,36 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 
 
 --
--- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner:
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: 
 --
 
 COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
+
+--
+-- Name: semver; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS semver WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION semver; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION semver IS 'Semantic version data type';
+
+
+--
+-- Name: format_width(text, integer); Type: FUNCTION; Schema: public; Owner: rollama
+--
+
+CREATE FUNCTION public.format_width(p_text text, p_width integer) RETURNS text
+    LANGUAGE plpgsql IMMUTABLE
+    AS $$ BEGIN RETURN ( SELECT string_agg(line, E'\n' || SPACE(80 - char_length(line))) FROM ( SELECT substring(text FOR 80) as line FROM ( SELECT split_part(p_text, E'\n', n) as text FROM generate_series(1, (char_length(p_text)::integer + 79)/80) as n(n) ) as s ) as t ); END; $$;
+
+
+ALTER FUNCTION public.format_width(p_text text, p_width integer) OWNER TO rollama;
 
 --
 -- Name: schedule_update(); Type: FUNCTION; Schema: public; Owner: rollama
@@ -241,7 +265,8 @@ CREATE TABLE public.prompt_completion_details (
     expires_at timestamp with time zone NOT NULL,
     size_vram bigint NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    prompt_completion_time integer NOT NULL
+    prompt_completion_time integer NOT NULL,
+    tokens_per_second real
 );
 
 
@@ -267,6 +292,41 @@ ALTER TABLE public.prompt_completion_details_id_seq OWNER TO rollama;
 --
 
 ALTER SEQUENCE public.prompt_completion_details_id_seq OWNED BY public.prompt_completion_details.id;
+
+
+--
+-- Name: rollamalogs; Type: TABLE; Schema: public; Owner: rollama
+--
+
+CREATE TABLE public.rollamalogs (
+    id integer NOT NULL,
+    "timestamp" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    log_json jsonb NOT NULL
+);
+
+
+ALTER TABLE public.rollamalogs OWNER TO rollama;
+
+--
+-- Name: rollamalogs_id_seq; Type: SEQUENCE; Schema: public; Owner: rollama
+--
+
+CREATE SEQUENCE public.rollamalogs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.rollamalogs_id_seq OWNER TO rollama;
+
+--
+-- Name: rollamalogs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: rollama
+--
+
+ALTER SEQUENCE public.rollamalogs_id_seq OWNED BY public.rollamalogs.id;
 
 
 --
@@ -318,6 +378,43 @@ CREATE SEQUENCE public.row_counts_seq
 
 
 ALTER TABLE public.row_counts_seq OWNER TO rollama;
+
+--
+-- Name: servicelogs; Type: TABLE; Schema: public; Owner: rollama
+--
+
+CREATE TABLE public.servicelogs (
+    id integer NOT NULL,
+    "timestamp" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    host_name text,
+    service_name text,
+    message jsonb
+);
+
+
+ALTER TABLE public.servicelogs OWNER TO rollama;
+
+--
+-- Name: servicelogs_id_seq; Type: SEQUENCE; Schema: public; Owner: rollama
+--
+
+CREATE SEQUENCE public.servicelogs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.servicelogs_id_seq OWNER TO rollama;
+
+--
+-- Name: servicelogs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: rollama
+--
+
+ALTER SEQUENCE public.servicelogs_id_seq OWNED BY public.servicelogs.id;
+
 
 --
 -- Name: subscription; Type: TABLE; Schema: public; Owner: rollama
@@ -384,10 +481,24 @@ ALTER TABLE ONLY public.prompt_completion_details ALTER COLUMN id SET DEFAULT ne
 
 
 --
+-- Name: rollamalogs id; Type: DEFAULT; Schema: public; Owner: rollama
+--
+
+ALTER TABLE ONLY public.rollamalogs ALTER COLUMN id SET DEFAULT nextval('public.rollamalogs_id_seq'::regclass);
+
+
+--
 -- Name: row_count_history id; Type: DEFAULT; Schema: public; Owner: rollama
 --
 
 ALTER TABLE ONLY public.row_count_history ALTER COLUMN id SET DEFAULT nextval('public.row_count_history_id_seq'::regclass);
+
+
+--
+-- Name: servicelogs id; Type: DEFAULT; Schema: public; Owner: rollama
+--
+
+ALTER TABLE ONLY public.servicelogs ALTER COLUMN id SET DEFAULT nextval('public.servicelogs_id_seq'::regclass);
 
 
 --
@@ -462,11 +573,27 @@ ALTER TABLE ONLY public.prompt_completion_details
 
 
 --
+-- Name: rollamalogs rollamalogs_pkey; Type: CONSTRAINT; Schema: public; Owner: rollama
+--
+
+ALTER TABLE ONLY public.rollamalogs
+    ADD CONSTRAINT rollamalogs_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: row_count_history row_count_history_pkey; Type: CONSTRAINT; Schema: public; Owner: rollama
 --
 
 ALTER TABLE ONLY public.row_count_history
     ADD CONSTRAINT row_count_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: servicelogs servicelogs_pkey; Type: CONSTRAINT; Schema: public; Owner: rollama
+--
+
+ALTER TABLE ONLY public.servicelogs
+    ADD CONSTRAINT servicelogs_pkey PRIMARY KEY (id);
 
 
 --
@@ -489,6 +616,13 @@ CREATE INDEX comment_post_id_idx ON public.comments USING btree (post_id, subred
 --
 
 CREATE INDEX errors_item_id_idx ON public.errors USING btree (item_id);
+
+
+--
+-- Name: idx_analysis_documents; Type: INDEX; Schema: public; Owner: rollama
+--
+
+CREATE INDEX idx_analysis_documents ON public.analysis_documents USING gin (analysis_document);
 
 
 --
@@ -534,6 +668,13 @@ CREATE INDEX idx_comments_comment_id ON public.comments USING btree (comment_id)
 
 
 --
+-- Name: idx_gin_service_message; Type: INDEX; Schema: public; Owner: rollama
+--
+
+CREATE INDEX idx_gin_service_message ON public.servicelogs USING gin (message);
+
+
+--
 -- Name: idx_parent_child_tree; Type: INDEX; Schema: public; Owner: rollama
 --
 
@@ -573,6 +714,41 @@ CREATE INDEX post_post_author_idx ON public.posts USING btree (post_author);
 --
 
 CREATE INDEX post_subreddit_idx ON public.posts USING btree (subreddit);
+
+
+--
+-- Name: rollamalogs_host_name_idx; Type: INDEX; Schema: public; Owner: rollama
+--
+
+CREATE INDEX rollamalogs_host_name_idx ON public.rollamalogs USING btree (((log_json ->> 'host_name'::text)));
+
+
+--
+-- Name: rollamalogs_log_json_idx; Type: INDEX; Schema: public; Owner: rollama
+--
+
+CREATE INDEX rollamalogs_log_json_idx ON public.rollamalogs USING gin (log_json);
+
+
+--
+-- Name: rollamalogs_program_name_idx; Type: INDEX; Schema: public; Owner: rollama
+--
+
+CREATE INDEX rollamalogs_program_name_idx ON public.rollamalogs USING btree (((log_json ->> 'program_name'::text)));
+
+
+--
+-- Name: rollamalogs_program_version_idx; Type: INDEX; Schema: public; Owner: rollama
+--
+
+CREATE INDEX rollamalogs_program_version_idx ON public.rollamalogs USING btree (((log_json ->> 'program_version'::text)));
+
+
+--
+-- Name: rollamalogs_severity_idx; Type: INDEX; Schema: public; Owner: rollama
+--
+
+CREATE INDEX rollamalogs_severity_idx ON public.rollamalogs USING btree (((log_json ->> 'severity'::text)));
 
 
 --
@@ -708,18 +884,7 @@ GRANT ALL ON TABLE public.websearch_results_ts TO rollama;
 GRANT ALL ON SEQUENCE public.websearch_results_ts_id_seq TO rollama;
 
 
-CREATE TABLE servicelogs (
-    id SERIAL PRIMARY KEY,
-    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    host_name TEXT,
-    service_name TEXT,
-    message JSONB
-);
-
-ALTER TABLE servicelogs OWNER TO rollama;
-
-CREATE INDEX idx_gin_service_message ON servicelogs USING GIN (message);
-
 --
 -- PostgreSQL database dump complete
 --
+

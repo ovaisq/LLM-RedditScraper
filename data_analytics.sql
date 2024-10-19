@@ -1,5 +1,6 @@
 --Queries for Apache Superset Dashboard
 --©2024, Ovais Quraishi
+
 --all subreddits an author has posted to or commented in
 SELECT post_author, subreddit
 FROM (
@@ -10,6 +11,7 @@ FROM (
     FROM comments
 ) AS subreddits_by_author
 ORDER BY post_author, subreddit;
+
 --all posts and comments from the author
 SELECT
     posts.post_id AS post_id,
@@ -28,6 +30,7 @@ JOIN
 WHERE
     posts.post_author = comments.comment_author
     and posts.post_body NOT IN ('[removed]', '');
+
 --AVG Prompt Completion Time Per Model
 SELECT model AS model,
        AVG(avg_completion_time) AS "AVG(avg_completion_time)"
@@ -39,6 +42,7 @@ FROM
    ORDER BY id DESC) AS virtual_table
 GROUP BY model
 ORDER BY "AVG(avg_completion_time)" DESC;
+
 --Total Successful Prompt Completions Per Day
 SELECT DATE_TRUNC('day', date) AS date,
        sum(num_analysis_documents) AS "SUM(num_analysis_documents)"
@@ -54,6 +58,7 @@ WHERE date >= TO_DATE('2024-08-22', 'YYYY-MM-DD')
 GROUP BY DATE_TRUNC('day', date)
 ORDER BY "SUM(num_analysis_documents)" DESC
 LIMIT 50000;
+
 --Reddit Scraper Table Row Counts
 SELECT table_name AS table_name,
                      rows_n AS rows_n
@@ -70,6 +75,7 @@ FROM
 WHERE table_name != 'parent_child_tree_data'
   AND table_name != 'websearch_results_ts'
 LIMIT 1000;
+
 --Top 10 Posts by Upvote Count of all Subreddits in the database
 SELECT post_title AS post_title,
        post_upvote_count AS post_upvote_count,
@@ -84,6 +90,7 @@ FROM
    limit 10) AS virtual_table
 ORDER BY post_upvote_count DESC
 LIMIT 1000;
+
 --Most Recent 10 Posrts per Subreddit
 SELECT subreddit AS subreddit,
        top_ten_posts AS top_ten_posts,
@@ -118,6 +125,7 @@ FROM
    order by subreddit,
             max_post_upvote_count desc) AS virtual_table
 LIMIT 1000;
+
 --Average Successful Prompt Completion time per model per Ollama Release
 SELECT ollama_ver::semver, model AS model,
        AVG(avg_completion_time) AS "AVG(avg_completion_time)"
@@ -129,6 +137,7 @@ FROM
    GROUP BY ollama_ver::semver, model, id order by id desc) AS virtual_table
 GROUP BY ollama_ver::semver, model
 ORDER BY ollama_ver::semver, model, "AVG(avg_completion_time)" desc;
+
 --Average Tokens Per Second Per Model
 SELECT model AS model,
        AVG("AVG(avg_tokens_per_second)") AS "AVG(AVG(avg_tokens_per_second))"
