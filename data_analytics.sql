@@ -194,3 +194,17 @@ AND NOT EXISTS (
         WHERE analysis_document ->> 'reference_id' = p.post_id
             AND analysis_document ->> 'reference_id' IS NOT NULL
     );
+
+---Total number of tokens generated per day
+SELECT DATE_TRUNC('day', date) AS date,
+       sum(total_tokens_per_request) AS "SUM(total_tokens_per_request)"
+FROM
+  (SELECT DATE_TRUNC('day', expires_at) AS date,
+          SUM(COALESCE((prompt_completion_time * tokens_per_second), 1.0 * COALESCE(tokens_per_second, 0))) AS total_tokens_per_request
+   FROM public.prompt_completion_details
+   WHERE tokens_per_second > 0
+   GROUP BY DATE_TRUNC('day', expires_at)
+   ORDER BY date) AS virtual_table
+GROUP BY DATE_TRUNC('day', date)
+ORDER BY "SUM(total_tokens_per_request)" DESC
+LIMIT 30;
