@@ -209,14 +209,56 @@ APP_SECRET_KEY=pjo2OaLXlTHXZj4jtOa+3b4JEUqcmKz7C8IJJg=
 ### Docker build (tested only on Debian 12 for now)
 
 ```sh {"id":"01J6QKN1V0VMEGDS79X0HRZZN9"}
-./build_docker.py
+> ./build_docker.py
 Building Docker image rollama:0.1.65 from /var/tmp/0.1.65...
 sha256:275958fcd3a7a049cc465fbe556802ba40d8cf9fff58ffd4da0593b85d5dca1a
 Docker image rollama:0.1.65 built successfully!
 ```
-
+### Run docker container
+```sh
+> docker run -d -p 5001:5001 rollama:0.1.65
+```
 **OR**
-
+### Deploy it on a Local Kubernetes cluster
+* Assumes Local Docker registry is serving over HTTP (not SSL), and Kubernetes cluster is deployed using containerd. Following steps are required:
+    * Set up local docker image registry
+    * Since when pulling images, Kubernetes defaults to HTTPS, you must manually add registry url to containerd on each node. Otherwise, the service will fail to deploy.
+#### Set up local Docker Image Repository
+```sh
+> docker run -d -p 5000:5000 --restart=always --name registry registry:2
+```
+#### Manually add registery to containerd on each node
+* Assuming that locally hosted registry is hosted by "docker" host, the following configuration needs to be added under the _**[plugins."io.containerd.grpc.v1.cri".registry.mirrors]**_ in the _**/etc/containerd/config.toml**_ file:
+```sh
+> sudo su -
+> cd /etc/containerd/
+> vi config.toml
+```
+**Configuration block**
+```code
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker:5000"]
+          endpoint = ["http://docker:5000"]
+```
+**Updated config should look as follows**:
+```code
+      [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker:5000"]
+          endpoint = ["http://docker:5000"]
+```
+* Apply configuration change
+```sh
+> systemctl daemon-reload
+``` 
+* Restart Service
+```sh
+> systemctl restart containerd
+```
+### Deploy Service to Cluster
+```sh
+> kubectl apply -f deployment.yaml
+> kubectl apply -f service.yaml
+```
+**OR**
 ### SYSTEMD install on a Debian 12 host
 
 * For now you have to be logged in as a root user: On the machine run

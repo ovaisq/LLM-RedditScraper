@@ -172,6 +172,7 @@ def analyze_post(post_id):
     """Analyze text from Reddit Post
     """
 
+    print (f'Analyzing post ID {post_id}')
     info_message = f'Analyzing post ID {post_id}'
     logging.info(info_message)
     log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)

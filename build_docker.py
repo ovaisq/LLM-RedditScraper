@@ -62,6 +62,8 @@ def build_docker_container(dockerfile_path, image_name, tag="latest", build_args
                 print(log['stream'].strip())
 
         print(f"Docker image {image_name}:{tag} built successfully!")
+        get_this_image = client.images.get(f"{image_name}:{tag}")
+        tag_it_latest = get_this_image.tag(f"{image_name}:latest")
 
     except docker.errors.BuildError as e:
         print(f"Failed to build Docker image {image_name}:{tag}: {e}")
