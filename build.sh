@@ -57,7 +57,7 @@ be_build_dir="builds/BE_${new_ver}"
 create_directory "${be_build_dir}"
 
 # Copy necessary files to the build directory
-files_to_copy=("docker_install_srvc.sh" "install_srvc.sh" "Dockerfile" "setup.config.template" "ver.txt" "build_docker.py")
+files_to_copy=("docker_install_srvc.sh" "install_srvc.sh" "Dockerfile" "setup.config.template" "ver.txt" "build_docker.py" "deployment.yaml"  "service.yaml")
 for file in "${files_to_copy[@]}"; do
     cp "$file" "${be_build_dir}"
 done
