@@ -79,3 +79,9 @@ else
         kubectl -n "${namespace}" apply -f service.yaml
         kubectl -n "${namespace}" get pods
 fi
+
+echo "**** Get Healthcheck of the service"
+k8_srvc_name=$(kubectl -n "${namespace}" get svc -o name | sed -e 's/service\///g')
+k8_srvc_nodeport=$(kubectl -n "${namespace}" get svc "${k8_srvc_name}" -o jsonpath='{.spec.ports[0].nodePort}')
+running_srvc_ver=$(curl -X GET -s "http://k8prod-1:${k8_srvc_nodeport}/version")
+echo "**** Running service version: ${running_srvc_ver}"
