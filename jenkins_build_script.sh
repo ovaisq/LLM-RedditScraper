@@ -5,26 +5,39 @@
 #  network only
 #
 # Assumes that image reposity url is:
-#   docker-registry:50000
+#   docker-registry:5000
+
+check_namespace() {
+  name_space="$1"
+  # Run the command and capture its output
+  output=$(kubectl get namespace | grep ${name_space} | awk '{print $1}')
+
+  # Check if the output is empty (i.e., only one line)
+  if [ -n "$output" ]; then
+    echo "Namespace [${name_space}] already exists"
+  else
+    echo "Namespace [${name_space}] does not exist"
+  fi
+}
 
 echo "**** Building Package"
-./build.sh
+./build.sh > /dev/null 2>&1
 
 export srvc_ver=$(<ver.txt)
 cd builds/BE_${srvc_ver}
 
 echo "**** Configuring Build"
-scp ovais@localhost:/home/ovais/rollama/setup.config .
+scp localhost:/apps/rollama/setup.config .
 
 echo "**** Creating Docker image"
-./build_docker.py
+./build_docker.py > /dev/null 2>&1
 
 echo "**** Clean up config"
 rm -f setup.config
 
 echo "**** Pushing Docker Image to Registry"
-docker tag rollama:${srvc_ver} docker:5000/rollama:${srvc_ver} > /dev/null 2>&1
-docker push docker:5000/rollama:${srvc_ver} > /dev/null 2>&1
+docker tag rollama:${srvc_ver} docker-registry:5000/rollama:${srvc_ver} > /dev/null 2>&1
+docker push docker-registry:5000/rollama:${srvc_ver} > /dev/null 2>&1
 
 echo "**** Cleaning up orphaned images"
 # List orphaned images (those with the <none> tag)
@@ -46,4 +59,23 @@ else
     # Remove specific local images
     docker image rm rollama:${srvc_ver} > /dev/null 2>&1
     docker image rm rollama:latest > /dev/null 2>&1
+fi
+
+# check if namespace exists
+srvc_name_tag=$(echo "$srvc_ver" | sed 's/^\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/v\1-\2-\3/')
+namespace="ollamagpt-${srvc_name_tag}"
+
+if ! check_namespace "${namespace}"
+then
+        echo "**** Creating namespace"
+        kubectl create namespace "${name_space}"
+        echo "**** Deploying Rollama ${srvc_ver} to namespace [${name_space}]"
+else
+        echo "**** Not Creating Namespace"
+        echo "**** Deploying Rollama ${srvc_ver} to namespace [${name_space}]"
+        echo "**** Deployment"
+        kubectl -n "${namespace}" apply -f deployment.yaml
+        echo "**** Service"
+        kubectl -n "${namespace}" apply -f service.yaml
+        kubectl -n "${namespace}" get pods
 fi
