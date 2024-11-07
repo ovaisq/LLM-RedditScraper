@@ -14,14 +14,17 @@ export srvc_ver=$(<ver.txt)
 cd builds/BE_${srvc_ver}
 
 echo "**** Configuring Build"
-scp localhost:/apps/rollama/setup.config .
+scp ovais@localhost:/home/ovais/rollama/setup.config .
 
 echo "**** Creating Docker image"
 ./build_docker.py
 
+echo "**** Clean up config"
+rm -f setup.config
+
 echo "**** Pushing Docker Image to Registry"
-docker tag rollama:${srvc_ver} docker-registry:5000/rollama:${srvc_ver} > /dev/null 2>&1
-docker push docker-registry:5000/rollama:${srvc_ver} > /dev/null 2>&1
+docker tag rollama:${srvc_ver} docker:5000/rollama:${srvc_ver} > /dev/null 2>&1
+docker push docker:5000/rollama:${srvc_ver} > /dev/null 2>&1
 
 echo "**** Cleaning up orphaned images"
 # List orphaned images (those with the <none> tag)
