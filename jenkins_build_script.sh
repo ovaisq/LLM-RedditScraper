@@ -1,6 +1,8 @@
 # Build package, then build docker image, push the docker image
 #  to private image registry running accessible on a local 
 #  network only
+# Assumes that image reposity url is:
+#	docker-registry:50000
 
 #!/bin/bash
 
