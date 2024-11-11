@@ -6,6 +6,7 @@
 import logging
 import os
 import psycopg2
+from psycopg2 import sql
 import cache
 from config import get_config
 from utils import subtract_lists
@@ -67,16 +68,10 @@ def insert_data_into_table(table_name, data):
     conn, cur = psql_connection()
     try:
         placeholders = ', '.join(['%s'] * len(data))
-        columns = ', '.join(data.keys())
-        # Since the table keys that matter are set to UNIQUE value,
-        #   I find the ON CONFLICT DO NOTHING more efficient than
-        #   doing a lookup before INSERT. This way original content
-        #   is preserved by default. In case of updating existing
-        #   data, one can write a method to safely update data
-        #   while also preserving original data. For example use
-        #   ON CONFLICT DO UPDATE. For now this'd do.
-        sql_query = f"""INSERT INTO {table_name} ({columns}) VALUES ({placeholders}) \
-                     ON CONFLICT DO NOTHING;"""
+        columns = sql.SQL(', ').join(map(sql.Identifier, data.keys()))
+        table = sql.Identifier(table_name)
+        sql_query = sql.SQL("""INSERT INTO {} ({}) VALUES ({}) ON CONFLICT DO NOTHING;""").format(
+            table, columns, sql.SQL(placeholders))
         cur.execute(sql_query, list(data.values()))
         conn.commit()
         info_message = f'Inserted into {table_name}'
