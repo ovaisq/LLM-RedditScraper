@@ -177,17 +177,17 @@ def analyze_post(post_id):
     logging.info(info_message)
     log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
-    sql_query = f"""SELECT 
+    sql_query = """SELECT 
                         post_title, post_body, post_id, post_upvote_count
                     FROM
                         posts
                     WHERE
-                        post_id='{post_id}'
+                        post_id=%s
                     AND
                         post_body 
                     NOT IN ('', '[removed]', '[deleted]');
                 """
-    post_data_list = get_select_query_result_dicts(sql_query)
+    post_data_list = get_select_query_result_dicts(sql_query, (post_id,))
 
     # should always return single row - post_id column is unique data
     if len(post_data_list) == 1:

@@ -104,12 +104,12 @@ def get_select_query_results(sql_query):
         except:
             pass
 
-def get_select_query_result_dicts(sql_query):
+def get_select_query_result_dicts(sql_query, params=None):
     """Execute a query, return all rows for the query as list of dictionaries"""
 
     conn, cur = psql_connection()
     try:
-        cur.execute(sql_query)
+        cur.execute(sql_query, params)
         columns = [desc[0] for desc in cur.description]  # Fetch column names
         result = [dict(zip(columns, row)) for row in cur.fetchall()]
         conn.close()
