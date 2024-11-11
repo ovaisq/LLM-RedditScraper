@@ -74,13 +74,13 @@ def insert_data_into_table(table_name, data):
         logging.error("%s", e)
         raise
 
-def get_select_query_results(sql_query):
+def get_select_query_results(sql_query, params=None):
     """Execute a query, return all rows for the query
     """
 
     conn, cur = psql_connection()
     try:
-        cur.execute(sql_query)
+        cur.execute(sql_query, params)
         # For SELECT query
         if sql_query.upper().strip().startswith('SELECT'):
             result = cur.fetchall()

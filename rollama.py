@@ -293,18 +293,18 @@ def analyze_comment(comment_id):
     logging.info(info_message)
     log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
 
-    sql_query = f"""SELECT
+    sql_query = """SELECT
                         comment_id, comment_body
                     FROM 
                         comments
                     WHERE
-                        comment_id='{comment_id}'
+                        comment_id=%s
                     AND 
                         comment_body
                     NOT IN ('', '[removed]', '[deleted]');
                 """
 
-    comment_data =  get_select_query_results(sql_query)
+    comment_data =  get_select_query_results(sql_query, (comment_id,))
 
     if not comment_data:
         warn_message = f'Comment ID {comment_id} contains no body'
