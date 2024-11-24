@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import requests
+import string
 import time
 import random
 import string
@@ -200,3 +201,33 @@ def subtract_lists(list1, list2):
     """Subtract two lists and return a single list of contents"""
 
     return list(set(list1) - set(list2))
+
+def count_words_and_punctuation(input_string):
+    """Counts the number of words and punctuation marks in the given input string.
+
+        Parameters:
+        input_string (str): The string for which to count words and punctuation marks.
+
+        Returns:
+            tuple: A tuple containing two elements:
+                    - word_count (int): The number of words in the input string.
+                    - punctuation_count (int): The number of punctuation marks in the input string.
+    
+        Example:
+        >>> count_words_and_punctuation("Hello, world! This is a test string. It contains words and punctuation.")
+            (10, 7)
+    """
+    # Initialize counters
+    word_count = 0
+    punctuation_count = 0
+    
+    # Split the string into words
+    words = input_string.split()
+    word_count = len(words)
+    
+    # Count punctuation marks using str.translate and str.maketrans
+    translator = str.maketrans('', '', string.punctuation)
+    no_punct = input_string.translate(translator)
+    punctuation_count = len(input_string) - len(no_punct)
+    
+    return word_count, punctuation_count
