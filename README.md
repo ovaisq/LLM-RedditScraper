@@ -598,3 +598,7 @@ rollama=> select * from cron.job_run_details order by runid desc limit 5;
 #### Database Schema
 
 ![Database Schema](database.png)
+
+#### Agentic-AI Platform Performance Metrics Dashboard
+
+![Dashboard](dashboard.png)
