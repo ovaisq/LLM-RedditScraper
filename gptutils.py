@@ -75,3 +75,4 @@ async def prompt_chat(llm,
         log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version(), 'ERROR', e)
         logging.error('%s',e.args[0])
         raise httpx.ConnectError('Unable to reach Ollama Server') from None
+
