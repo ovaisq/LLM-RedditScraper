@@ -14,4 +14,3 @@ schedule
 urllib3
 duckduckgo_search
 redis
-string
