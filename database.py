@@ -52,19 +52,6 @@ def execute_query(sql_query):
 def insert_data_into_table(table_name, data):
     """Insert data into table"""
 
-    allowed_tables = ['table1', 'table2', 'rollamalogs', 'servicelogs']  # Add allowed table names here
-    if table_name not in allowed_tables:
-        raise ValueError(f"Invalid table name: {table_name}")
-
-    allowed_columns = {
-        'table1': ['column1', 'column2'],
-        'table2': ['column1', 'column2'],
-        'rollamalogs': ['timestamp', 'log_json'],
-        'servicelogs': ['timestamp', 'log_json']
-    }
-    if not all(col in allowed_columns.get(table_name, []) for col in data.keys()):
-        raise ValueError(f"Invalid columns for table {table_name}")
-
     conn, cur = psql_connection()
     try:
         placeholders = ', '.join(['%s'] * len(data))
