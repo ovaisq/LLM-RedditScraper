@@ -67,6 +67,7 @@ def insert_data_into_table(table_name, data):
             logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'INFO', info_message)
     except psycopg2.Error as e:
         logging.error("%s", e)
+        conn.close()
         raise
 
 def get_select_query_results(sql_query, params=None):

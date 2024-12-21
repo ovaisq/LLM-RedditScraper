@@ -678,7 +678,7 @@ CREATE INDEX idx_gin_service_message ON public.servicelogs USING gin (message);
 -- Name: idx_parent_child_tree; Type: INDEX; Schema: public; Owner: rollama
 --
 
-CREATE INDEX idx_parent_child_tree ON public.parent_child_tree_data USING btree (parent_child_tree);
+CREATE INDEX idx_parent_child_tree ON public.parent_child_tree_data (md5(parent_child_tree::text));
 
 
 --
