@@ -57,7 +57,6 @@ compare_strings() {
     export srvc_ver=$recent_git_tag
   else
     echo "Strings are not equal"
-    export srvc_ver=$(<ver.txt)
   fi
 }
 
@@ -74,23 +73,29 @@ compare_strings "${curr_git_tag_commit_id}" "${curr_commit_id}" "${curr_git_tag}
 echo "**** Building Package"
 ./build.sh > /dev/null 2>&1
 
+# build script increments the build number
+export srvc_ver=$(<ver.txt)
 
+echo "**** v${srvc_ver} successfully built"
 cd builds/BE_${srvc_ver}
 
-echo "**** Configuring Build"
+echo "**** Configuring Build v${srvc_ver}"
 scp ovais@localhost:/home/ovais/rollama/setup.config .
 
-echo "**** Creating Docker image"
+echo "**** Creating Docker image rollama:${srvc_ver}"
 ./build_docker.py > /dev/null 2>&1
 
 echo "**** Clean up config"
 rm -f setup.config
 
-echo "**** Pushing Docker Image to Registry"
+echo "**** Pushing Docker Image rollama:${srvc_ver} to remote registry"
 docker tag rollama:${srvc_ver} docker:5000/rollama:${srvc_ver} > /dev/null 2>&1
 docker tag rollama:latest docker:5000/rollama:latest > /dev/null 2>&1
 docker push docker:5000/rollama:${srvc_ver} > /dev/null 2>&1
 docker push docker:5000/rollama:latest > /dev/null 2>&1
+
+# change directory back to source root
+cd -
 
 echo "**** Cleaning up orphaned images"
 # List orphaned images (those with the <none> tag)
@@ -120,28 +125,28 @@ namespace="ollamagpt-${srvc_name_tag}"
 
 if ! check_namespace "${namespace}"
 then
-        echo "**** Creating namespace"
-        kubectl create namespace "${name_space}"
-        echo "**** Deploying Rollama v${srvc_ver} to namespace [${name_space}]"
-        echo "**** Deployment"
-        # deployment defaults to "latest" tag
-        kubectl -n "${namespace}" apply -f deployment.yaml
-        echo "**** Service"
+    echo "**** Creating namespace: ${namespace}"
+    kubectl create namespace "${name_space}"
+    echo "**** Deploying Rollama v${srvc_ver} to namespace [${name_space}]"
+    echo "**** Deployment"
+    # deployment defaults to "latest" tag
+    kubectl -n "${namespace}" apply -f deployment.yaml
+    echo "**** Service v${srvc_ver}"
 		sed -i '' "s/SEMVER/${srvc_ver}/g" service.yaml
-        kubectl -n "${namespace}" apply -f service.yaml
-		check_pod_status "${namespace}"
-		echo "**** Pod is now Running"
-        kubectl -n "${namespace}" get pods
+    kubectl -n "${namespace}" apply -f service.yaml
+    check_pod_status "${namespace}"
+    echo "**** Pod is now Running"
+    kubectl -n "${namespace}" get pods
 		git checkout service.yaml
 else
-        echo "**** Not Creating Namespace"
-        echo "**** Deploying Rollama v${srvc_ver} to namespace [${name_space}]"
-        echo "**** Deployment"
-        kubectl -n "${namespace}" apply -f deployment.yaml
-        echo "**** Service"
-        kubectl -n "${namespace}" apply -f service.yaml
+    echo "**** Not Creating Namespace"
+    echo "**** Deploying Rollama v${srvc_ver} to namespace [${name_space}]"
+    echo "**** Deployment"
+    kubectl -n "${namespace}" apply -f deployment.yaml
+    echo "**** Service"
+    kubectl -n "${namespace}" apply -f service.yaml
 		check_pod_status "${namespace}"
-		echo "**** Pod is now Running"
+		echo "**** Pod is now Running in namespace: ${namespace}"
 		kubectl -n "${namespace}" get pods
 fi
 
@@ -151,15 +156,19 @@ k8_srvc_nodeport=$(kubectl -n "${namespace}" get svc "${k8_srvc_name}" -o jsonpa
 running_srvc_ver=$(curl -X GET -s "http://k8prod-1.ifthenelse.org:${k8_srvc_nodeport}/version")
 if [ -n "${running_srvc_ver}" ]
 then
-	echo "**** Running service version: ${running_srvc_ver}"
+	  echo "**** Running service version: ${running_srvc_ver}"
     if [ "${curr_git_tag_commit_id}" != "${curr_commit_id}" ]
     then
-    	export new_tag=$(<ver.txt)
-    	echo "Applying and pushing New Tag ${new_tag}"
-    	./git_tag_push.sh
+        export new_tag=$(<ver.txt)
+    	  echo "**** Applying and pushing New Tag ${new_tag}"
+    	  ./git_tag_push.sh
+        echo "**** Pushing new ver.txt to remote repo"
+        git add ver.txt
+        git commit -m "Updating version to ${new_tag}"
+        git push origin HEAD:main
     fi
     exit 0
 else
-	echo "ERROR:**** Service is not running"
+	  echo "ERROR:**** Service is not running"
     exit -1
 fi
