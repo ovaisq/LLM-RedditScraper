@@ -94,9 +94,6 @@ docker tag rollama:latest docker:5000/rollama:latest > /dev/null 2>&1
 docker push docker:5000/rollama:${srvc_ver} > /dev/null 2>&1
 docker push docker:5000/rollama:latest > /dev/null 2>&1
 
-# change directory back to source root
-cd -
-
 echo "**** Cleaning up orphaned images"
 # List orphaned images (those with the <none> tag)
 orphaned_images=$(docker image ls --filter "dangling=true" -q)
@@ -149,6 +146,9 @@ else
 		echo "**** Pod is now Running in namespace: ${namespace}"
 		kubectl -n "${namespace}" get pods
 fi
+
+# change directory back to source root
+cd -
 
 echo "**** Get Healthcheck of the service"
 k8_srvc_name=$(kubectl -n "${namespace}" get svc -o name | sed -e 's/service\///g')
