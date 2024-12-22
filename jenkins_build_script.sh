@@ -129,6 +129,7 @@ then
     # deployment defaults to "latest" tag
     kubectl -n "${namespace}" apply -f deployment.yaml
     echo "**** Service v${srvc_ver}"
+	echo "${PWD}"
 	sed -i '' 's/SEMVER/'${srvc_ver}'/g' service.yaml
     kubectl -n "${namespace}" apply -f service.yaml
     check_pod_status "${namespace}"
