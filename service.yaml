@@ -9,4 +9,3 @@ spec:
   ports:
     - port: 5001
       targetPort: 5001
-  version: "SEMVER"

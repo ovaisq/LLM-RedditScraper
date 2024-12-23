@@ -125,28 +125,27 @@ then
     echo "**** Creating namespace: ${namespace}"
     kubectl create namespace "${name_space}"
     echo "**** Deploying Rollama v${srvc_ver} to namespace [${name_space}]"
-    echo "**** Deployment"
+    echo "**** Deployment "
     # deployment defaults to "latest" tag
+    sed -i "s|SEMVER|"${srvc_ver}"|" deployment.yaml
     kubectl -n "${namespace}" apply -f deployment.yaml
     echo "**** Service v${srvc_ver}"
-	  echo "${PWD}"
-	  sed -i "s|SEMVER|"${srvc_ver}"|" service.yaml
     kubectl -n "${namespace}" apply -f service.yaml
     check_pod_status "${namespace}"
     echo "**** Pod is now Running"
     kubectl -n "${namespace}" get pods
-		git checkout service.yaml
+		git checkout deployment.yaml
 else
     echo "**** Not Creating Namespace"
     echo "**** Deploying Rollama v${srvc_ver} to namespace [${name_space}]"
     echo "**** Deployment"
+    sed -i "s|SEMVER|"${srvc_ver}"|" deployment.yaml
     kubectl -n "${namespace}" apply -f deployment.yaml
     echo "**** Service v${srvc_ver}"
-    sed -i "s|SEMVER|"${srvc_ver}"|" service.yaml
-    kubectl -n "${namespace}" apply -f service.yaml
 		check_pod_status "${namespace}"
 		echo "**** Pod is now Running in namespace: ${namespace}"
 		kubectl -n "${namespace}" get pods
+    git checkout deployment.yaml
 fi
 
 # change directory back to source root

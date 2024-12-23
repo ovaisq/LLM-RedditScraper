@@ -1,7 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rollama
+  name: rollama-deployment
+  labels:
+    app: rollama
+    environment: production
+    version: SEMVER
 spec:
   replicas: 2
   selector:
@@ -11,10 +15,11 @@ spec:
     metadata:
       labels:
         app: rollama
+        verion: SEMVER
     spec:
       containers:
       - name: rollama
-        image: docker:5000/rollama:latest
+        image: docker:5000/rollama:SEMVER
         imagePullPolicy: Always
         ports:
         - containerPort: 5001
