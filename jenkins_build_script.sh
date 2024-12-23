@@ -130,7 +130,7 @@ then
     kubectl -n "${namespace}" apply -f deployment.yaml
     echo "**** Service v${srvc_ver}"
 	  echo "${PWD}"
-	  sed -i '' 's|SEMVER|"${srvc_ver}"|' service.yaml
+	  sed -i "s|SEMVER|"${srvc_ver}"|" service.yaml
     kubectl -n "${namespace}" apply -f service.yaml
     check_pod_status "${namespace}"
     echo "**** Pod is now Running"
@@ -142,7 +142,7 @@ else
     echo "**** Deployment"
     kubectl -n "${namespace}" apply -f deployment.yaml
     echo "**** Service v${srvc_ver}"
-    sed -i '' 's|SEMVER|"${srvc_ver}"|' service.yaml
+    sed -i "s|SEMVER|"${srvc_ver}"|" service.yaml
     kubectl -n "${namespace}" apply -f service.yaml
 		check_pod_status "${namespace}"
 		echo "**** Pod is now Running in namespace: ${namespace}"
