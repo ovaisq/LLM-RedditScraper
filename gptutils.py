@@ -38,7 +38,8 @@ async def prompt_chat(llm,
                                                {
                                                 'role': 'user',
                                                 'content': content,
-                                                'keep_alive' : 0
+                                                'keep_alive' : -1,
+                                                'num_ctx' : 4096
                                                },
                                               ],
                                      options = {
