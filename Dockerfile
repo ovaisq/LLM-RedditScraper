@@ -1,16 +1,10 @@
 # Use Debian Bookworm as the base image ©2024, Ovais Quraishi
-FROM bitnami/minideb:bookworm
+FROM python:3.9-slim
 
-WORKDIR /app/
+WORKDIR /app
 
 # Debian 12 thing
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
-
-# Install Python3 and required packages using Apt
-RUN apt-get -qqq update && \
-    apt-get -qqq install -y python3 python3-pip && \
-	apt-get clean && \
-    pip3 install --upgrade pip setuptools wheel --quiet --root-user-action=ignore
 
 # Copy necessary files to /app directory
 COPY *.TXT /app/
