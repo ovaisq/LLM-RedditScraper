@@ -15,7 +15,7 @@ spec:
     metadata:
       labels:
         app: rollama
-        verion: SEMVER
+        version: SEMVER
     spec:
       containers:
       - name: rollama
@@ -23,3 +23,10 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 5001
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "4Gi"
+            cpu: "500m"
