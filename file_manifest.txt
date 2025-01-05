@@ -2,6 +2,7 @@ cache.py
 config.py
 database.py
 encryption.py
+external.py
 gptutils.py
 logit.py
 license.txt
