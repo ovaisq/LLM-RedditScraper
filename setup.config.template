@@ -32,3 +32,8 @@ LLMS=
 OLLAMA_API_URL=
 PROC_WORKERS=
 SRVC_SHARED_SECRET=
+
+[external]
+caching_srvc_login_url=
+caching_srvc_crud_url=
+caching_srvc_secret=

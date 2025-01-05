@@ -38,13 +38,6 @@
     Customize it to your hearts content!
 
     LICENSE: The 3-Clause BSD License - license.txt
-
-    TODO:
-        - Add Swagger Docs
-        - Add long running task queue
-            - Queue: task_id, task_status, end_point
-            - Kafka
-        - Add logic to handle list of lists with NUM_ELEMENTS_CHUNK elements
 """
 
 import asyncio
@@ -205,16 +198,18 @@ def analyze_post(post_id):
     text = post_data['post_title'] + post_data['post_body']
     # post_id
     post_id = post_data['post_id']
-    if add_key('post_id', post_id):
+    if add_key('post_id_' + post_id):
         try:
             language = detect(text)
             # starting at ollama 0.1.24 and .25, it hangs on greek text
             if language not in ('en'):
+                add_key('post_id_' + post_id)
                 info_message = f'Skipping {post_id} - language detected {language}'
                 logging.info(info_message)
                 log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
                 return
         except langdetect.lang_detect_exception.LangDetectException as e:
+            add_key('post_id_' + post_id)
             info_message = f'Skipping {post_id} - language detected UNKNOWN {e}'
             logging.info(info_message)
             log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
@@ -316,18 +311,18 @@ def analyze_comment(comment_id):
     text = comment_data[0][1]
     # comment_id
     comment_id = comment_data[0][0]
-    if add_key('comment_id', comment_id): 
+    if add_key('comment_id_' + comment_id): 
         try:
             language = detect(text)
             # starting at ollama 0.1.24 and .25, it hangs on greek text
             if language not in ('en'):
-                add_key('comment_id', comment_id)
+                add_key('comment_id_' + comment_id)
                 info_message = f'Skipping {comment_id} - language detected {language}'
                 logging.info(info_message)
                 log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
                 return
         except langdetect.lang_detect_exception.LangDetectException as e:
-            add_key('comment_id', comment_id)
+            add_key('comment_id_' + comment_id)
             info_message = f'Skipping {comment_id} - language detected UNKNOWN {e}'
             logging.info(info_message)
             log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
@@ -546,7 +541,7 @@ def process_author(author_name):
                 insert_data_into_table('authors', author_data)
         except (AttributeError, TypeError, exceptions.NotFound) as e:
             # store this for later inspection
-            add_key('author_id', author_name)
+            add_key('author_id_' + author_name)
             warn_message = f'AUTHOR {author_name} {e.args[0]}'
             logging.warning(warn_message)
             log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
@@ -597,12 +592,12 @@ def get_authors_comments():
                 counter = sleep_to_avoid_429(counter)
             except exceptions.NotFound as e:
                 # store this for later inspection
-                add_key('author_id', an_author)
+                add_key('author_id_' + an_author)
                 warn_message = f'REDDITOR DELETED {an_author} {e.args[0]}'
                 logging.warning(warn_message)
                 log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
             except AttributeError as e:
-                add_key('author_id', an_author)
+                add_key('author_id_' + an_author)
                 warn_message = f'REDDITOR DELETED {an_author} {e.args[0]}'
                 logging.warning(warn_message)
                 log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
@@ -648,7 +643,7 @@ def get_author_comments(author):
     # when author has no comments available - either author has been removed or blocked
     except exceptions.Forbidden as e:
         # store this for later inspection
-        add_key('author_id', author)
+        add_key('author_id_' + author)
         warn_message = f'FOLLOWING AUTHOR {author} {e.args[0]}'
         logging.warning(warn_message)
         log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
