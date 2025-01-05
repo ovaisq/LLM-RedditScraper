@@ -67,6 +67,12 @@ ARG redis_password
 ENV redis_password $redis_password
 ARG SRVC_NAME
 ENV SRVC_NAME $SRVC_NAME
+ARG caching_srvc_login_url
+ENV caching_srvc_login_url $caching_srvc_login_url
+ARG caching_srvc_crud_url
+ENV caching_srvc_crud_url $caching_srvc_crud_url
+ARG caching_srvc_secret
+ENV caching_srvc_secret $caching_srvc_secret
 
 # Run ROllama Run!
 CMD ["/usr/local/rollama/docker_run_srvc.sh"]
