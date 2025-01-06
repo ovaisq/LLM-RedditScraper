@@ -185,7 +185,7 @@ def db_get_post_ids():
     for a_post_id in post_ids:
         post_id_list.append(a_post_id[0])
 
-    cached_list = cache.get_set_contents('post_ids')
+    cached_list = cache.get_set_contents('post_id')
     post_id_list = subtract_lists(post_id_list, cached_list)
 
     return post_id_list

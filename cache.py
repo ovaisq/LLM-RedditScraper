@@ -30,7 +30,7 @@ def add_key(key):
         logit.log_message_to_db(os.environ['SRVC_NAME'], logit.get_rollama_version()['version'], 'INFO', info_message)
         return False
     else:
-        data_payload = {"command": "WRITE", "key": key, "value" : "", "expire" : -1} #never expire
+        data_payload = {"command": "WRITE", "key": key, "value" : "", "expire" : 2592000} #Expires in 30 days
         json_resp = external.cache_api(caching_srvc_crud_url, payload=data_payload)
         if json_resp['status'] == 'SUCCESS':
             info_message = f'{key} added'
@@ -50,5 +50,21 @@ def lookup_key(key):
 
 def get_set_contents(set_name):
     """Get contents of a redis set as a list"""
-
-    return list(r.smembers(set_name))
+    
+    # this is now left for backwards compatibility
+    old_byte_list = r.smembers(set_name)
+    old_string_list = [z.decode('utf-8') for z in old_byte_list] # bytes to string
+    
+    # now use keys instead of sets
+    byte_list = list(r.scan_iter(set_name + '*'))
+    string_list = [y.decode('utf-8') for y in byte_list] # bytes to string
+    
+    # update list with just the ids 
+    for index, value in enumerate(string_list):
+        if set_name in value:
+            string_list[index] = value.replace(set_name + '_', '')
+    
+    # merge old redis set and new keys list
+    content_list = old_string_list + string_list
+    
+    return content_list
