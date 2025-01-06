@@ -2,6 +2,7 @@
 # cache.py
 # ©2024, Ovais Quraishi
 
+import redis
 import logging
 import os
 
@@ -12,6 +13,12 @@ import external
 
 get_config()
 caching_srvc_crud_url = os.environ['caching_srvc_crud_url']
+
+# connect to your Redis instance
+r = redis.StrictRedis(host=os.environ['redis_host'],
+                port=os.environ['redis_port'],
+                password=os.environ['redis_password']
+               )
 
 
 def add_key(key):
@@ -40,3 +47,8 @@ def lookup_key(key):
         return True
     else:
         return False
+
+def get_set_contents(set_name):
+    """Get contents of a redis set as a list"""
+
+    return list(r.smembers(set_name))
