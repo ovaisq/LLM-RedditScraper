@@ -37,13 +37,11 @@ async def prompt_chat(llm,
                                      messages=[
                                                {
                                                 'role': 'user',
-                                                'content': content,
-                                                'keep_alive' : -1,
-                                                'num_ctx' : 4096
+                                                'content': content
                                                },
                                               ],
                                      options = {
-                                                'temperature' : 0
+                                                'temperature' : 0.1
                                                }
                                     )
 
