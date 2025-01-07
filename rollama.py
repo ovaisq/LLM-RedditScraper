@@ -524,7 +524,7 @@ def process_author(author_name):
     """Process author information.
     """
 
-    if not lookup_key('author_id', author_name):
+    if not lookup_key('author_id_' + author_name):
         info_message = f'Processing Author {author_name}'
         logging.info(info_message)
         log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
@@ -585,7 +585,7 @@ def get_authors_comments():
 
     counter = 0
     for an_author in authors:
-        if not lookup_key('author_id', an_author):
+        if not lookup_key('author_id_' + an_author):
             try:
                 REDDIT.redditor(an_author)
                 get_author_comments(an_author)
