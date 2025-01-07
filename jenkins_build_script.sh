@@ -118,7 +118,7 @@ fi
 
 # check if namespace exists
 srvc_name_tag=$(echo "$srvc_ver" | sed 's/^\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/v\1-\2-\3/')
-namespace="ollamagpt-${srvc_name_tag}"
+namespace="ollamagpt-v0-3-25"
 
 if ! check_namespace "${namespace}"
 then
