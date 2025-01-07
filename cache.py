@@ -74,7 +74,7 @@ def lookup_key(key):
 
 
 def get_set_contents(set_name):
-    """Get contents of a redis set as a list"""
+    """Get contents of a redis keys as a list"""
 
     # now use keys instead of sets
     byte_list = list(redis_client().scan_iter(set_name + "*"))
