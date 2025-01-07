@@ -76,10 +76,6 @@ def lookup_key(key):
 def get_set_contents(set_name):
     """Get contents of a redis set as a list"""
 
-    # this is now left for backwards compatibility
-    old_byte_list = redis_client().smembers(set_name)
-    old_string_list = [z.decode("utf-8") for z in old_byte_list]  # bytes to string
-
     # now use keys instead of sets
     byte_list = list(redis_client().scan_iter(set_name + "*"))
     string_list = [y.decode("utf-8") for y in byte_list]  # bytes to string
@@ -89,7 +85,4 @@ def get_set_contents(set_name):
         if set_name in value:
             string_list[index] = value.replace(set_name + "_", "")
 
-    # merge old redis set and new keys list
-    content_list = old_string_list + string_list
-
-    return content_list
+    return string_list
