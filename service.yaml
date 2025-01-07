@@ -6,7 +6,6 @@ spec:
   type: LoadBalancer
   selector:
     app: rollama
-  sessionAffinity: ClientIP
   ports:
     - port: 5001
       targetPort: 5001
