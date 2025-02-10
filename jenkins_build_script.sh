@@ -89,10 +89,10 @@ echo "**** Clean up config"
 rm -f setup.config
 
 echo "**** Pushing Docker Image rollama:${srvc_ver} to remote registry"
-docker tag rollama:${srvc_ver} docker:5000/rollama:${srvc_ver} > /dev/null 2>&1
-docker tag rollama:latest docker:5000/rollama:latest > /dev/null 2>&1
-docker push docker:5000/rollama:${srvc_ver} > /dev/null 2>&1
-docker push docker:5000/rollama:latest > /dev/null 2>&1
+docker tag rollama:${srvc_ver} jenkins-node-1:5000/rollama:${srvc_ver} > /dev/null 2>&1
+docker tag rollama:latest jenkins-node-1:5000/rollama:latest > /dev/null 2>&1
+docker push jenkins-node-1:5000/rollama:${srvc_ver} > /dev/null 2>&1
+docker push jenkins-node-1:5000/rollama:latest > /dev/null 2>&1
 
 echo "**** Cleaning up orphaned images"
 # List orphaned images (those with the <none> tag)
