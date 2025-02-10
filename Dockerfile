@@ -73,6 +73,10 @@ ARG caching_srvc_crud_url
 ENV caching_srvc_crud_url $caching_srvc_crud_url
 ARG caching_srvc_secret
 ENV caching_srvc_secret $caching_srvc_secret
+ARG OTLP_ENDPOINT_URL
+ENV OTLP_ENDPOINT_URL $OTLP_ENDPOINT_URL
+ARG COLLECT_GPU_STATS
+ENV COLLECT_GPU_STATS $COLLECT_GPU_STATS
 
 # Run ROllama Run!
 CMD ["/usr/local/rollama/docker_run_srvc.sh"]
