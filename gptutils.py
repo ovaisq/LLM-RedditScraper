@@ -32,7 +32,9 @@ async def prompt_chat(llm,
 
     dt = ts_int_to_dt_obj()
     OLLAMA_VER = get_semver()
-    openlit.init(otlp_endpoint=os.environ['OTLP_ENDPOINT_URL'], collect_gpu_stats=os.environ['COLLECT_GPU_STATS'])
+    openlit.init(otlp_endpoint=os.environ['OTLP_ENDPOINT_URL'],
+                 collect_gpu_stats=os.environ['COLLECT_GPU_STATS'],
+                 pricing_json=os.environ['PRICIING_JSON'])
     client = AsyncClient(host=os.environ['OLLAMA_API_URL'])
     logging.info('Running for %s', llm)
     try:

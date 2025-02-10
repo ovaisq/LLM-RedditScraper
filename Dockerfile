@@ -10,6 +10,7 @@ ENV PIP_BREAK_SYSTEM_PACKAGES 1
 COPY *.TXT /app/
 COPY *.gz /app/
 COPY docker_install_srvc.sh /app/
+COPY pricing.json /app/
 
 # Execute installation script
 RUN /app/docker_install_srvc.sh
@@ -77,6 +78,8 @@ ARG OTLP_ENDPOINT_URL
 ENV OTLP_ENDPOINT_URL $OTLP_ENDPOINT_URL
 ARG COLLECT_GPU_STATS
 ENV COLLECT_GPU_STATS $COLLECT_GPU_STATS
+ARG PRICIING_JSON
+ENV PRICIING_JSON $PRICIING_JSON
 
 # Run ROllama Run!
 CMD ["/usr/local/rollama/docker_run_srvc.sh"]
