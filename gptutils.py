@@ -9,6 +9,10 @@ import os
 import httpx
 
 from ollama import AsyncClient
+import openlit
+from deepeval import evaluate
+from deepeval.test_case import LLMTestCase
+from deepeval.metrics import AnswerRelevancyMetric
 
 from config import get_config
 from encryption import encrypt_text
@@ -28,6 +32,7 @@ async def prompt_chat(llm,
 
     dt = ts_int_to_dt_obj()
     OLLAMA_VER = get_semver()
+    openlit.init(otlp_endpoint=os.environ['OTLP_ENDPOINT_URL'], collect_gpu_stats=os.environ['COLLECT_GPU_STATS'])
     client = AsyncClient(host=os.environ['OLLAMA_API_URL'])
     logging.info('Running for %s', llm)
     try:
@@ -75,3 +80,20 @@ async def prompt_chat(llm,
         logging.error('%s',e.args[0])
         raise httpx.ConnectError('Unable to reach Ollama Server') from None
 
+def test_answer_relevancy():
+    """
+        deepeval set-local-model --model-name=phi4 \
+        --base-url="http://192.168.3.16/v1/" \
+        --api-key="ollama"
+    """
+    answer_relevancy_metric = AnswerRelevancyMetric(threshold=0.5)
+    test_case = LLMTestCase(
+        input="What is the recommended daily protein intake for adults?",
+        actual_output="The recommended daily protein intake for adults is 0.8 grams per kilogram of body weight.",
+        retrieval_context=["""Protein is an essential macronutrient that plays crucial roles in building and 
+        repairing tissues.Good sources include lean meats, fish, eggs, and legumes. The recommended 
+        daily allowance (RDA) for protein is 0.8 grams per kilogram of body weight for adults. 
+        Athletes and active individuals may need more, ranging from 1.2 to 2.0 
+        grams per kilogram of body weight."""]
+    )
+    evaluate([test_case], [answer_relevancy_metric])

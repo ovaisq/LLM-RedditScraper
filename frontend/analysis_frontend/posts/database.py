@@ -180,6 +180,7 @@ def deb_get_post_analysis_comments():
                     SELECT ad.analysis_document->>'reference_id' as pid
                     FROM analysis_documents ad
                     WHERE ad.analysis_document->>'category' = 'post'
+                    AND ad.analysis_document->>'llm' = 'phi4'
                     ORDER BY random() LIMIT 1
                 ), post_comments AS (
                     SELECT

@@ -33,6 +33,10 @@ OLLAMA_API_URL=
 PROC_WORKERS=
 SRVC_SHARED_SECRET=
 
+[otlp]
+OTLP_ENDPOINT_URL=
+COLLECT_GPU_STATS=True
+
 [external]
 caching_srvc_login_url=
 caching_srvc_crud_url=
