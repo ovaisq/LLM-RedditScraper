@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: rollama
-        image: docker:5000/rollama:SEMVER
+        image: jenkins-node-1:5000/rollama:SEMVER
         imagePullPolicy: Always
         ports:
         - containerPort: 5001
