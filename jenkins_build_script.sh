@@ -144,11 +144,11 @@ else
     kubectl -n "${namespace}" apply -f deployment.yaml
     echo "**** Service v${srvc_ver}"
     kubectl -n "${namespace}" apply -f service.yaml
-	check_pod_status "${namespace}"
-	echo "**** Pod is now Running in namespace: ${namespace}"
-	kubectl -n "${namespace}" get pods
+	  check_pod_status "${namespace}"
+	  echo "**** Pod is now Running in namespace: ${namespace}"
+ 	  kubectl -n "${namespace}" get pods
     git checkout deployment.yaml
-	git checkout service.yaml
+	  git checkout service.yaml
 fi
 
 # change directory back to source root
