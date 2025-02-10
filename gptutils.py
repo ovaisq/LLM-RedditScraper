@@ -83,7 +83,7 @@ async def prompt_chat(llm,
 def test_answer_relevancy():
     """
         deepeval set-local-model --model-name=phi4 \
-        --base-url="http://192.168.3.16/v1/" \
+        --base-url="http://<OLLAMA URL>/v1/" \
         --api-key="ollama"
     """
     answer_relevancy_metric = AnswerRelevancyMetric(threshold=0.5)
