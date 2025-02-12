@@ -35,7 +35,9 @@ async def prompt_chat(llm,
     OLLAMA_VER = get_semver()
     openlit.init(otlp_endpoint=os.environ['OTLP_ENDPOINT_URL'],
                  collect_gpu_stats=os.environ['COLLECT_GPU_STATS'],
-                 pricing_json=os.environ['PRICING_JSON'])
+                 pricing_json=os.environ['PRICING_JSON'],
+                 environment='production',
+                 application_name='reddit-scraper')
     client = AsyncClient(host=os.environ['OLLAMA_API_URL'])
     logging.info('Running for %s', llm)
     try:
