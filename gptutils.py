@@ -10,7 +10,6 @@ import httpx
 from pathlib import Path
 
 from ollama import AsyncClient
-import openlit
 from deepeval import evaluate
 from deepeval.test_case import LLMTestCase
 from deepeval.metrics import AnswerRelevancyMetric
@@ -24,12 +23,6 @@ from utils import get_semver
 
 get_config()
 
-# init openlit
-openlit.init(otlp_endpoint=os.environ['OTLP_ENDPOINT_URL'],
-             collect_gpu_stats=os.environ['COLLECT_GPU_STATS'],
-             pricing_json=os.environ['PRICING_JSON'],
-             environment='production',
-             application_name='reddit-scraper')
 
 async def prompt_chat(llm,
                       content,
