@@ -45,6 +45,7 @@ import hashlib
 import json
 import logging
 import os
+import random
 import time
 
 import langdetect
@@ -56,7 +57,7 @@ from prawcore import exceptions
 from concurrent.futures import ProcessPoolExecutor
 
 # Import required local modules
-from cache import add_key, lookup_key
+from cache import add_key, lookup_key, check_and_increment
 from config import get_config
 from database import db_get_authors
 from database import insert_data_into_table
@@ -67,7 +68,7 @@ from database import db_get_post_ids
 from database import db_get_comment_ids
 from gptutils import prompt_chat
 from reddit_api import create_reddit_instance
-from utils import unix_ts_str, sleep_to_avoid_429, get_vals_list_of_dicts
+from utils import unix_ts_str, get_vals_list_of_dicts
 from utils import calculate_prompt_completion_time, store_model_perf_info
 from logit import log_message_to_db, get_rollama_version
 
@@ -406,10 +407,13 @@ def get_sub_posts(sub):
     try:
         posts = REDDIT.subreddit(sub).hot(limit=None)
         new_post_ids = get_new_data_ids('posts', 'post_id', posts)
-        counter = 0
+
         for post_id in new_post_ids:
             get_sub_post(post_id)
-            counter = sleep_to_avoid_429(counter)
+            if not check_and_increment('rollama'):
+                sleep_for = random.randrange(75, 150)
+                logging.info("Sleeping for %s seconds", sleep_for)
+                time.sleep(sleep_for)
     except AttributeError as e:
         # store this for later inspection
         warn_message = f'GET SUB POSTS {sub} {e.args[0]}'
@@ -591,13 +595,15 @@ def get_authors_comments():
         log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'WARNING', warn_message)
         return
 
-    counter = 0
     for an_author in authors:
         if not lookup_key('author_id_' + an_author):
             try:
                 REDDIT.redditor(an_author)
                 get_author_comments(an_author)
-                counter = sleep_to_avoid_429(counter)
+                if not check_and_increment('rollama'):
+                    sleep_for = random.randrange(75, 150)
+                    logging.info("Sleeping for %s seconds", sleep_for)
+                    time.sleep(sleep_for)
             except exceptions.NotFound as e:
                 # store this for later inspection
                 add_key('author_id_' + an_author)
@@ -631,7 +637,6 @@ def get_author_comments(author):
             log_message_to_db(os.environ['SRVC_NAME'], get_rollama_version()['version'], 'INFO', info_message)
             return
 
-        counter = 0
         if author_comments:
             num_comments = len(author_comments)
             info_message = f'{author} {num_comments} new comments'
@@ -640,8 +645,10 @@ def get_author_comments(author):
             for comment_id in author_comments:
                 comment = REDDIT.comment(comment_id)
                 process_comment(comment)
-                counter = sleep_to_avoid_429(counter)
-
+                if not check_and_increment('rollama'):
+                    sleep_for = random.randrange(75, 150)
+                    logging.info("Sleeping for %s seconds", sleep_for)
+                    time.sleep(sleep_for)
     except AttributeError as e:
         # store this for later inspection
         warn_message = f'AUTHOR COMMENT {comment_id} {e.args[0]}'

@@ -36,7 +36,7 @@ SRVC_SHARED_SECRET=
 [otlp]
 OTLP_ENDPOINT_URL=
 COLLECT_GPU_STATS=True
-PRICIING_JSON=pricing.json
+PRICING_JSON=pricing.json
 
 [external]
 caching_srvc_login_url=
