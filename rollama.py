@@ -411,7 +411,7 @@ def get_sub_posts(sub):
         for post_id in new_post_ids:
             get_sub_post(post_id)
             if not check_and_increment('rollama'):
-                sleep_for = random.randrange(75, 150)
+                sleep_for = random.randrange(60, 65)
                 logging.info("Sleeping for %s seconds", sleep_for)
                 time.sleep(sleep_for)
     except AttributeError as e:
@@ -601,7 +601,7 @@ def get_authors_comments():
                 REDDIT.redditor(an_author)
                 get_author_comments(an_author)
                 if not check_and_increment('rollama'):
-                    sleep_for = random.randrange(75, 150)
+                    sleep_for = random.randrange(60, 65)
                     logging.info("Sleeping for %s seconds", sleep_for)
                     time.sleep(sleep_for)
             except exceptions.NotFound as e:
@@ -646,7 +646,7 @@ def get_author_comments(author):
                 comment = REDDIT.comment(comment_id)
                 process_comment(comment)
                 if not check_and_increment('rollama'):
-                    sleep_for = random.randrange(75, 150)
+                    sleep_for = random.randrange(60, 65)
                     logging.info("Sleeping for %s seconds", sleep_for)
                     time.sleep(sleep_for)
     except AttributeError as e:
