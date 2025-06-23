@@ -68,7 +68,7 @@ def check_and_refresh_token(jwt_token):
         if current_time > expiration_time:
             # Token is expired; fetch a new one using the get_jwt_token function
             print("Token has expired. Fetching a new token...")
-            return get_jwt_token()
+            return get_jwt_token(caching_srvc_login_url, caching_srvc_payload, caching_srvc_headers)
 
         # Token is still valid
         return jwt_token
